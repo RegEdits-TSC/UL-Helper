@@ -153,18 +153,26 @@ def reconfigure():
     console.print("[bold yellow]WARN[/bold yellow]: After verification of config, rerun command.")
     console.print("[dim green]Thanks for using Uploadrr :)")
     exit()
-
-if 'version' not in config or Version(config.get('version')) < minimum_version:  # Check for version and reconfigures
-    reconfigure()
+    
+# Check if 'version' key is in config and if it's less than the minimum required version
+if 'version' not in config or Version(config.get('version')) < minimum_version:
+    reconfigure()  # Function to handle reconfiguration if version is outdated
 
 try:
+    # Attempt to import example_config and check if its version is newer than the current config's version
     from data.backup import example_config
     if 'version' in example_config.config and Version(example_config.config.get('version')) > Version(config.get('version')):
         console.print("[bold yellow]WARN[/bold yellow]: Config version out of date, updating is recommended.")
         console.print("[bold yellow]WARN[/bold yellow]: Simply pass --reconfig")
 except Exception as e:
+    # Handle errors during import or version checking
     console.print(f"[bold red]Error: {str(e)}[/bold red]")
-    pass
+
+# Initialize Clients and Args with the current configuration
+client = Clients(config=config)
+parser = Args(config)
+
+
 
 
 client = Clients(config=config)
