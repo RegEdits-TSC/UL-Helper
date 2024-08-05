@@ -71,7 +71,28 @@ http_trackers = [
     'FL', 'HDB', 'HDT', 'MTV', 'PTER', 'TTG'
 ]
 
-############# EDITING BELOW THIS LINE MAY RESULT IN SCRIPT BREAKING #############
+#  .--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--. 
+# / .. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \
+# \ \/\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ \/ /
+#  \/ /`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'\/ / 
+#  / /\                                                                    / /\ 
+# / /\ \   __        __     _      ____    _   _   ___   _   _    ____    / /\ \
+# \ \/ /   \ \      / /    / \    |  _ \  | \ | | |_ _| | \ | |  / ___|   \ \/ /
+#  \/ /     \ \ /\ / /    / _ \   | |_) | |  \| |  | |  |  \| | | |  _     \/ / 
+#  / /\      \ V  V /    / ___ \  |  _ <  | |\  |  | |  | |\  | | |_| |    / /\ 
+# / /\ \      \_/\_/    /_/   \_\ |_| \_\ |_| \_| |___| |_| \_|  \____|   / /\ \
+# \ \/ /                                                                  \ \/ /
+#  \/ /                                                                    \/ / 
+#  / /\.--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--./ /\ 
+# / /\ \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \/\ \
+# \ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `' /
+#  `--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--' 
+
+######### EDITING BELOW THIS LINE MAY CAUSE THE SCRIPT TO MALFUNCTION. #########
+
+######### EDITING BELOW THIS LINE MAY CAUSE THE SCRIPT TO MALFUNCTION. #########
+
+######### EDITING BELOW THIS LINE MAY CAUSE THE SCRIPT TO MALFUNCTION. #########
 
 # Determine the path to the Python 3 executable
 python3_path = shutil.which("python3")
@@ -892,27 +913,46 @@ async def do_the_thing(base_dir):
 
 
 
-
-
-
-
-
-    ### FEEDBACK ###
+#  .--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--. 
+# / .. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \
+# \ \/\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ \/ /
+#  \/ /`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'\/ / 
+#  / /\                                                                        / /\ 
+# / /\ \    _____   _____   _____   ____    ____       _       ____   _  __   / /\ \
+# \ \/ /   |  ___| | ____| | ____| |  _ \  | __ )     / \     / ___| | |/ /   \ \/ /
+#  \/ /    | |_    |  _|   |  _|   | | | | |  _ \    / _ \   | |     | ' /     \/ / 
+#  / /\    |  _|   | |___  | |___  | |_| | | |_) |  / ___ \  | |___  | . \     / /\ 
+# / /\ \   |_|     |_____| |_____| |____/  |____/  /_/   \_\  \____| |_|\_\   / /\ \
+# \ \/ /                                                                      \ \/ /
+#  \/ /                                                                        \/ / 
+#  / /\.--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--./ /\ 
+# / /\ \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \/\ \
+# \ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `' /
+#  `--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--' 
 
     def format_path_with_files(path, files):
+        # Initialize a Text object to hold the formatted text
         formatted_text = Text()
+
+        # Add the path with bold styling
         formatted_text.append("Path: ")
         formatted_text.append(f"{path}", style="bold")  # Removed the newline here
+
+        # Loop through the list of files to add them to the formatted text
         for i, file in enumerate(files):
             file_name = os.path.basename(file)
-            # Add a newline before each file, but not before the first one
-            #if i != 0:
+
+            # Add a newline before each file
             formatted_text.append("\n")
-            formatted_text.append(f"• {file_name}") 
+            formatted_text.append(f"• {file_name}")
+
         return formatted_text
 
     if total_files > 0:
+        # Print an empty line for spacing
         console.print()
+
+        # Print the summary panel with details of the upload process
         console.print(Panel(
             f"Processed [bold bright_magenta]{total_files}[/bold bright_magenta] Unique Uploads\n"
             f"Successful Uploads: [bold green]{successful_uploads}[/bold green]\n"
@@ -920,6 +960,10 @@ async def do_the_thing(base_dir):
             title="Upload Summary",
             border_style="bold cyan"
         ))
+
+
+
+
 
     # Handle skipped files
     if skipped_files > 0:
