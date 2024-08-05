@@ -1,0 +1,138 @@
+                                ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::                                     
+                                ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::                                     
+                                ::    _   _ ____  _     ___    _    ____       _   _ _____ _     ____  _____ ____     ::                                     
+                                ::   | | | |  _ \| |   / _ \  / \  |  _ \     | | | | ____| |   |  _ \| ____|  _ \    ::                                     
+                                ::   | | | | |_) | |  | | | |/ _ \ | | | |    | |_| |  _| | |   | |_) |  _| | |_) |   ::                                     
+                                ::   | |_| |  __/| |__| |_| / ___ \| |_| |    |  _  | |___| |___|  __/| |___|  _ <    ::                                     
+                                ::    \___/|_|   |_____\___/_/   \_\____/     |_| |_|_____|_____|_|   |_____|_| \_\   ::                                     
+                                ::                                                                                    ::                                     
+                                ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::                                     
+                                ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::                                     
+                                                                                                                                                             
+                                                                                                                                                             
+                                                                                                                                                             
+usage: upload.py [-h] [-fd] [-s SCREENS] [-c [{movie,tv,fanres} ...]] [-t [{disc,remux,encode,webdl,web-dl,webrip,hdtv} ...]]
+                 [--source [{Blu-ray,BluRay,DVD,HDDVD,WEB,HDTV,UHDTV} ...]] [-res [{2160p,1080p,1080i,720p,576p,576i,480p,480i,8640p,4320p,other} ...]]
+                 [-tmdb [TMDB_MANUAL ...]] [-imdb [IMDB ...]] [-mal [MAL ...]] [-g [TAG ...]] [-serv [SERVICE ...]] [-dist [DISTRIBUTOR ...]]
+                 [-edition [MANUAL_EDITION ...]] [-season [SEASON ...]] [-episode [EPISODE ...]] [-daily MANUAL_DATE] [--no-season] [--no-year] [--no-aka]
+                 [--no-dub] [--no-tag] [-ns] [-year [MANUAL_YEAR]] [-ptp [PTP ...]] [-blu [BLU ...]] [-hdb [HDB ...]] [-d [DESC ...]] [-pb [DESCLINK ...]]
+                 [-df [DESCFILE ...]] [-aid] [-ih [{imgbb,ptpimg,imgbox,pixhost,lensdump} ...]] [-siu] [-th [TORRENTHASH ...]] [-nfo] [-k [KEYWORDS ...]]
+                 [-reg [REGION ...]] [-a] [-st] [-webdv] [-hc] [-pr] [-sdc] [-debug] [-ffdebug] [-m] [-nh] [-rh] [-ps [{1,2,4,8,16} ...]] [-dr]
+                 [-tc [{torf,torrenttools,mktorrent} ...]] [-client [CLIENT ...]] [-qbt [QBIT_TAG ...]] [-qbc [QBIT_CAT ...]] [-rtl [RTORRENT_LABEL ...]]
+                 [-tk [TRACKERS ...]] [-rt [RANDOMIZED ...]] [-aq AUTO_QUEUE] [-sq] [-delay DELAY] [-random] [-vs] [-cleanup] [-reconfig]
+                 [-fl [FREELEECH ...]]
+                 [path ...]
+
+positional arguments:
+  path                  Path to file/directory
+
+options:
+  -h, --help            show this help message and exit
+  -fd, --full-directory
+                        Uploads Folder + ALL Content Within
+  -s SCREENS, --screens SCREENS
+                        Number of screenshots
+  -c [{movie,tv,fanres} ...], --category [{movie,tv,fanres} ...]
+                        Category [MOVIE, TV, FANRES]
+  -t [{disc,remux,encode,webdl,web-dl,webrip,hdtv} ...], --type [{disc,remux,encode,webdl,web-dl,webrip,hdtv} ...]
+                        Type [DISC, REMUX, ENCODE, WEBDL, WEBRIP, HDTV]
+  --source [{Blu-ray,BluRay,DVD,HDDVD,WEB,HDTV,UHDTV} ...]
+                        Source [Blu-ray, BluRay, DVD, HDDVD, WEB, HDTV, UHDTV]
+  -res [{2160p,1080p,1080i,720p,576p,576i,480p,480i,8640p,4320p,other} ...], --resolution [{2160p,1080p,1080i,720p,576p,576i,480p,480i,8640p,4320p,other} ...]
+                        Resolution [2160p, 1080p, 1080i, 720p, 576p, 576i, 480p, 480i, 8640p, 4320p, OTHER]
+  -tmdb [TMDB_MANUAL ...], --tmdb [TMDB_MANUAL ...]
+                        TMDb ID
+  -imdb [IMDB ...], --imdb [IMDB ...]
+                        IMDb ID
+  -mal [MAL ...], --mal [MAL ...]
+                        MAL ID
+  -g [TAG ...], --tag [TAG ...]
+                        Group Tag
+  -serv [SERVICE ...], --service [SERVICE ...]
+                        Streaming Service
+  -dist [DISTRIBUTOR ...], --distributor [DISTRIBUTOR ...]
+                        Disc Distributor e.g.(Criterion, BFI, etc.)
+  -edition [MANUAL_EDITION ...], --edition [MANUAL_EDITION ...], --repack [MANUAL_EDITION ...]
+                        Edition/Repack String e.g.(Director's Cut, Uncut, Hybrid, REPACK, REPACK3)
+  -season [SEASON ...], --season [SEASON ...]
+                        Season (number)
+  -episode [EPISODE ...], --episode [EPISODE ...]
+                        Episode (number)
+  -daily MANUAL_DATE, --daily MANUAL_DATE
+                        Air date of this episode (YYYY-MM-DD)
+  --no-season           Remove Season from title
+  --no-year             Remove Year from title
+  --no-aka              Remove AKA from title
+  --no-dub              Remove Dubbed from title
+  --no-tag              Remove Group Tag from title
+  -ns, --no-seed        Do not add torrent to the client
+  -year [MANUAL_YEAR], --year [MANUAL_YEAR]
+                        Year
+  -ptp [PTP ...], --ptp [PTP ...]
+                        PTP torrent id/permalink
+  -blu [BLU ...], --blu [BLU ...]
+                        BLU torrent id/link
+  -hdb [HDB ...], --hdb [HDB ...]
+                        HDB torrent id/link
+  -d [DESC ...], --desc [DESC ...]
+                        \"[b]Custom Description[/b]\"
+  -pb [DESCLINK ...], --desclink [DESCLINK ...]
+                        \"https://pastebin.com/URL\"
+  -df [DESCFILE ...], --descfile [DESCFILE ...]
+                        \"\path\to\description.txt\"
+  -aid, --auto-insert-desc
+                        Uses (file or season folder).txt or decription.txt existing in upload path
+  -ih [{imgbb,ptpimg,imgbox,pixhost,lensdump} ...], --imghost [{imgbb,ptpimg,imgbox,pixhost,lensdump} ...]
+                        Image Host
+  -siu, --skip-imagehost-upload
+                        Skip Uploading to an image host
+  -th [TORRENTHASH ...], --torrenthash [TORRENTHASH ...]
+                        Torrent Hash to re-use from your client's session directory
+  -nfo, --nfo           Use .nfo in directory for description
+  -k [KEYWORDS ...], --keywords [KEYWORDS ...]
+                        Add comma seperated keywords e.g. 'keyword, keyword2, etc'
+  -reg [REGION ...], --region [REGION ...]
+                        Region for discs
+  -a, --anon            Upload anonymously
+  -st, --stream         Stream Optimized Upload
+  -webdv, --webdv       Contains a Dolby Vision layer converted using dovi_tool
+  -hc, --hardcoded-subs
+                        Contains hardcoded subs
+  -pr, --personalrelease
+                        Personal Release
+  -sdc, --skip-dupe-check
+                        Pass if you know this is a dupe (Skips dupe check)
+  -debug, --debug       Debug Mode, will run through all the motions providing extra info, but will not upload to trackers.
+  -ffdebug, --ffdebug   Will show info from ffmpeg while taking screenshots.
+  -m, --manual          Manual Mode. Returns link to ddl screens/base.torrent
+  -nh, --nohash         Don't hash .torrent
+  -rh, --rehash         DO hash .torrent
+  -ps [{1,2,4,8,16} ...], --piece-size-max [{1,2,4,8,16} ...]
+                        Maximum piece size in MiB
+  -dr, --draft          Send to drafts (BHD)
+  -tc [{torf,torrenttools,mktorrent} ...], --torrent-creation [{torf,torrenttools,mktorrent} ...]
+                        What tool should be used to create the base .torrent
+  -client [CLIENT ...], --client [CLIENT ...]
+                        Use this torrent client instead of default
+  -qbt [QBIT_TAG ...], --qbit-tag [QBIT_TAG ...]
+                        Add to qbit with this tag
+  -qbc [QBIT_CAT ...], --qbit-cat [QBIT_CAT ...]
+                        Add to qbit with this category
+  -rtl [RTORRENT_LABEL ...], --rtorrent-label [RTORRENT_LABEL ...]
+                        Add to rtorrent with this label
+  -tk [TRACKERS ...], --trackers [TRACKERS ...]
+                        Upload to these trackers, space seperated (--trackers blu bhd)
+  -rt [RANDOMIZED ...], --randomized [RANDOMIZED ...]
+                        Number of extra, torrents with random infohash
+  -aq AUTO_QUEUE, --auto-queue AUTO_QUEUE
+                        Automatically queue files in a directory
+  -sq, --show-queue     Show the list of queued files
+  -delay DELAY, --delay DELAY
+                        Delay between queued torrents in seconds
+  -random, --random     Ranzomize queue order
+  -vs, --vapoursynth    Use vapoursynth for screens (requires vs install)
+  -cleanup, --cleanup   Clean up tmp directory
+  -reconfig, --reconfig
+                        Auto Update Config
+  -fl [FREELEECH ...], --freeleech [FREELEECH ...]
+                        Freeleech Percentage
