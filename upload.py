@@ -631,135 +631,181 @@ async def do_the_thing(base_dir):
                         console.print(f"[green]{meta['name']}")
                         console.print(f"[green]Files can be found at: [yellow]{url}[/yellow]")
 
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-
+            # Check if the tracker is "BHD"
             if tracker == "BHD":
+                # Initialize the BHD class with the given configuration
                 bhd = BHD(config=config)
+
+                # Get the draft status for BHD
                 draft_int = await bhd.get_live(meta)
                 draft = "Draft" if draft_int == 0 else "Live"
+
+                # Determine if the upload should proceed based on user input or unattended mode
                 if meta['unattended']:
                     upload_to_bhd = True
                 else:
+                    # Prompt the user to confirm the upload to BHD
                     upload_to_bhd = Confirm.ask(f"Upload to BHD? ({draft}) {debug}")
+
                 if upload_to_bhd:
+                    # Inform the user that the upload is starting
                     console.print("Uploading to BHD")
+
+                    # Check if the group is banned; skip if it is
                     if check_banned_group("BHD", bhd.banned_groups, meta, skipped_details, path):
                         skipped_files += 1
                         skipped_details.append((path, f"Banned group on {tracker_class.tracker}")) 
                         continue
+
+                    # Search for existing duplicates and filter them
                     dupes = await bhd.search_existing(meta)
                     dupes = await common.filter_dupes(dupes, meta)
+
+                    # Perform a duplicate check
                     meta, skipped = dupe_check(dupes, meta)
                     if skipped:
                         skipped_files += 1
                         skipped_details.append((path, tracker))
                         continue
+
+                    # If no duplicates and upload is confirmed, proceed with the upload
                     if meta['upload']:
                         await bhd.upload(meta)
                         await client.add_to_client(meta, "BHD")
                         successful_uploads += 1
-            
+
+            # Check if the tracker is "THR"
             if tracker == "THR":
+                # Determine if the upload should proceed based on user input or unattended mode
                 if meta['unattended']:
                     upload_to_thr = True
                 else:
+                    # Prompt the user to confirm the upload to THR
                     upload_to_thr = Confirm.ask(f"Upload to THR? {debug}")
+
                 if upload_to_thr:
+                    # Inform the user that the upload is starting
                     console.print("Uploading to THR")
+
+                    # Function to validate IMDB ID format
                     def is_valid_imdb_id(imdb_id):
                         return re.match(r'tt\d{7}', imdb_id) is not None
+
+                    # Check if IMDB ID is missing or invalid
                     if meta.get('imdb_id', '0') == '0':
                         while True:
+                            # Prompt the user for a valid IMDB ID
                             imdb_id = Prompt.ask("Please enter a valid IMDB id (e.g., tt1234567)")
                             if is_valid_imdb_id(imdb_id):
+                                # Format and store the IMDB ID
                                 meta['imdb_id'] = imdb_id.replace('tt', '').zfill(7)
                                 break
                             else:
+                                # Inform the user of an invalid ID and prompt again
                                 print("Invalid IMDB id. Please try again.")
+
+                    # Function to extract YouTube video ID from URL
                     def get_youtube_id(url):
                         parsed_url = urlparse(url)
                         if "youtube.com" in parsed_url.netloc:
                             if "watch" in parsed_url.path:
+                                # Extract video ID from query parameters
                                 video_id = parse_qs(parsed_url.query).get('v', None)
                                 if video_id:
                                     return video_id[0]
                         return None
 
+                    # Check if YouTube trailer URL is missing
                     if meta.get('youtube', None) is None:
                         while True:
+                            # Prompt user to provide a YouTube trailer URL or ID
                             youtube = Prompt.ask("Unable to find youtube trailer, please link one\n[dim] e.g.(https://www.youtube.com/watch?v=dQw4w9WgXcQ or dQw4w9WgXcQ)[/dim]")
                             video_id = get_youtube_id(youtube)
                             if video_id is not None:
+                                # Store the valid YouTube video ID
                                 meta['youtube'] = video_id
                                 break
                             else:
+                                # Inform user of invalid input and prompt again
                                 print("Invalid YouTube URL or ID. Please enter a valid full URL.")
+                    
+                    # Initialize THR tracker instance
                     thr = THR(config=config)
+                    
                     try:
+                        # Use a requests session for HTTP requests
                         with requests.Session() as session:
+                            # Log in to THR
                             console.print("[yellow]Logging in to THR")
                             session = thr.login(session)
+                            
+                            # Search for existing duplicates
                             console.print("[yellow]Searching for Dupes")
                             dupes = thr.search_existing(session, meta.get('imdb_id'))
                             dupes = await common.filter_dupes(dupes, meta)
+                            
+                            # Check for duplicates and handle accordingly
                             meta, skipped = dupe_check(dupes, meta)
                             if skipped:
                                 skipped_files += 1
                                 skipped_details.append((path, tracker))
                                 continue
+                            
+                            # Upload to THR if no duplicates are found
                             if meta['upload']:
                                 await thr.upload(session, meta)
                                 await client.add_to_client(meta, "THR")
                                 successful_uploads += 1
                     except:
+                        # Handle exceptions and print traceback
                         console.print(traceback.print_exc())
-
+                        
+            # Check if the tracker is "PTP"
             if tracker == "PTP":
+                # Determine whether to upload based on the 'unattended' setting or user confirmation
                 if meta['unattended']:
                     upload_to_ptp = True
                 else:
                     upload_to_ptp = Confirm.ask(f"Upload to {tracker}? {debug}")
+                
                 if upload_to_ptp:
                     console.print(f"Uploading to {tracker}")
+
                     def is_valid_imdb_id(imdb_id):
-                        # Check if the imdb_id matches the pattern tt followed by 7 digits
+                        # Check if the IMDb ID matches the pattern "tt" followed by 7 digits
                         return re.match(r'tt\d{7}', imdb_id) is not None
 
+                    # Prompt for IMDb ID if it's not already set
                     if meta.get('imdb_id', '0') == '0':
                         while True:
                             imdb_id = Prompt.ask("Please enter a valid IMDB id (e.g., tt1234567)")
                             if is_valid_imdb_id(imdb_id):
+                                # Store the cleaned IMDb ID
                                 meta['imdb_id'] = imdb_id.replace('tt', '').zfill(7)
                                 break
                             else:
+                                # Inform user of invalid IMDb ID and prompt again
                                 print("Invalid IMDB id. Please try again.")
+                    
+                    # Initialize PTP tracker instance
                     ptp = PTP(config=config)
+                    
+                    # Check for banned groups
                     if check_banned_group(tracker_class.tracker, tracker_class.banned_groups, meta, skipped_details, path):
                         skipped_files += 1
-                        skipped_details.append((path, f"Banned group on {tracker_class.tracker}"))                                          
+                        skipped_details.append((path, f"Banned group on {tracker_class.tracker}"))
                         continue
+                    
                     try:
+                        # Search for the group ID based on IMDb ID
                         console.print("[yellow]Searching for Group ID")
                         groupID = await ptp.get_group_by_imdb(meta['imdb_id'])
+                        
                         if groupID is None:
                             console.print("[yellow]No Existing Group found")
+                            
                             def get_youtube_id(url):
+                                # Extract the YouTube video ID from the URL
                                 parsed_url = urlparse(url)
                                 if "youtube.com" in parsed_url.netloc:
                                     if "watch" in parsed_url.path:
@@ -768,27 +814,38 @@ async def do_the_thing(base_dir):
                                             return video_id[0]
                                 return None
 
+                            # Prompt user for YouTube trailer URL if not set
                             if meta.get('youtube', None) is None:
                                 while True:
                                     youtube = Prompt.ask("Unable to find youtube trailer, please link one\n[dim] e.g.(https://www.youtube.com/watch?v=dQw4w9WgXcQ or dQw4w9WgXcQ)[/dim]")
                                     video_id = get_youtube_id(youtube)
                                     if video_id is not None:
+                                        # Store the valid YouTube video ID
                                         meta['youtube'] = video_id
                                         break
                                     else:
+                                        # Inform user of invalid input and prompt again
                                         print("Invalid YouTube URL or ID. Please enter a valid full URL.")
-                            meta['upload'] = True
+                                
+                                # Set upload flag to True
+                                meta['upload'] = True
                         else:
                             console.print("[yellow]Searching for Existing Releases")
                             dupes = await ptp.search_existing(groupID, meta)
                             dupes = await common.filter_dupes(dupes, meta)
+                            
+                            # Check for duplicates and handle accordingly
                             meta, skipped = dupe_check(dupes, meta)
                             if skipped:
                                 skipped_files += 1
                                 skipped_details.append((path, tracker))
                                 continue
+                        
+                        # Retrieve IMDb information if not already set
                         if meta.get('imdb_info', {}) == {}:
                             meta['imdb_info'] = await prep.get_imdb_info(meta['imdb_id'], meta)
+                        
+                        # Upload to PTP if all checks pass
                         if meta['upload']:
                             ptpUrl, ptpData = await ptp.fill_upload_form(groupID, meta)
                             await ptp.upload(meta, ptpUrl, ptpData)
@@ -796,23 +853,34 @@ async def do_the_thing(base_dir):
                             await client.add_to_client(meta, "PTP")
                             successful_uploads += 1
                     except:
+                        # Handle exceptions and print traceback
                         console.print(traceback.print_exc())
-
+                        
+            # Check if the tracker is "TL"
             if tracker == "TL":
+                # Initialize tracker class based on the tracker name
                 tracker_class = tracker_class_map[tracker](config=config)
+
+                # Determine whether to upload based on the 'unattended' setting or user confirmation
                 if meta['unattended']:
                     upload_to_tracker = True
                 else:
                     upload_to_tracker = Confirm.ask(f"Upload to {tracker_class.tracker}? {debug}")
+
                 if upload_to_tracker:
                     console.print(f"Uploading to {tracker_class.tracker}")
+
+                    # Check for banned groups and handle accordingly
                     if check_banned_group(tracker_class.tracker, tracker_class.banned_groups, meta, skipped_details, path):
                         skipped_files += 1
-                        skipped_details.append((path, f"Banned group on {tracker_class.tracker}"))  
+                        skipped_details.append((path, f"Banned group on {tracker_class.tracker}"))
                         continue
+
+                    # Perform upload and update client
                     await tracker_class.upload(meta)
                     await client.add_to_client(meta, tracker_class.tracker)
-                    successful_uploads += 1 
+                    successful_uploads += 1
+
           
 
 
