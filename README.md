@@ -130,12 +130,12 @@ Arguments are optional. For a list of acceptable arguments, use `--help`. For an
 Special thanks to __l1mo__ for the Dockerfile setup and __dare__ for the command. Run the tool using Docker with one of the following commands:
 ```
 docker run --rm -it --network=host \
--v /path/to/config.py:/Uploadrr/data/config.py \
+-v /path/to/config.py:/UL-Helper/data/config.py \
 -v /path/to/media:/media \
 -v /path/to/BT_backup:/BT_backup \
-ghcr.io/z-ink/uploadrr:master "/path/to/media" --args
+ghcr.io/RegEdits-TSC/UL-Helper:master "/path/to/media" --args
 ```
 __OR__
 ```
-docker run --rm -it --network=host -v /path/to/config.py:/Uploadrr/data/config.py -v /path/to/media:/media -v /path/to/BT_backup:/BT_backup ghcr.io/z-ink/uploadrr:master "/path/to/media" --args
+docker run --rm -it --network=host -v /path/to/config.py:/UL-Helper/data/config.py -v /path/to/media:/media -v /path/to/BT_backup:/BT_backup ghcr.io/RegEdits-TSC/UL-Helper:master "/path/to/media" --args
 ```
