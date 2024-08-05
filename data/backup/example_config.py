@@ -396,7 +396,7 @@ config = {
 	    'anon_signature' : '\n[center][size=6]we are anonymous[/size][/center]',
 	    "pr_signature": "\n [center]PERSONAL RELEASE[/center] \n[center][b]PLEASE SEED TTR FAMILY[/b][/center]\n[center][url=https://github.com/z-ink/uploadrr][img=400]https://i.ibb.co/2NVWb0c/uploadrr.webp[/img][/url][/center]",
 	    "anon_pr_signature": "\n[center][url=https://github.com/z-ink/Uploadrr][img=40]https://i.ibb.co/n0jF73x/hacker.png[/img][/url][/center]",		
-	},
+	    },
 	    
         "ULCX" : {
             "api_key" : "ULCX_API_KEY",
@@ -426,16 +426,14 @@ config = {
             "anon_signature" : "\n[center][url=https://github.com/z-ink/Uploadrr][img=40]https://i.ibb.co/n0jF73x/hacker.png[/img][/url][/center]",  
             "pr_signature": "\n [center]PERSONAL RELEASE[/center] \n[center][b]PLEASE SEED VHD FAMILY[/b][/center]\n[center][url=https://github.com/z-ink/uploadrr][img=400]https://i.ibb.co/2NVWb0c/uploadrr.webp[/img][/url][/center]",
             "anon_pr_signature": "\n[center][url=https://github.com/z-ink/Uploadrr][img=40]https://i.ibb.co/n0jF73x/hacker.png[/img][/url][/center]",	
-    },        
+        },        
 
         "MANUAL" : {
             # Uncomment and replace link with filebrowser (https://github.com/filebrowser/filebrowser) link to the Uploadrr directory, this will link to your filebrowser instead of uploading to uguu.se
             # "filebrowser" : "https://domain.tld/filebrowser/files/Uploadrr/"
         },
-    },
-
-
-"TORRENT_CLIENTS" : {
+    
+        "TORRENT_CLIENTS" : {
         # Name your torrent clients here, for example, this example is named "Client1"
         "Client1" : {
             "torrent_client" : "qbit",
