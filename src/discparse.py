@@ -9,33 +9,38 @@ from collections import OrderedDict
 import json
 
 from src.console import console
-    
-    
+
 class DiscParse():
+    """
+    Class to handle parsing of BDInfo files for Blu-ray discs.
+    """
     def __init__(self):
         pass
 
-    """
-    Get and parse bdinfo
-    """
     async def get_bdinfo(self, discs, folder_id, base_dir, meta_discs):
+        """
+        Get and parse BDInfo for the given discs.
+        """
         save_dir = f"{base_dir}/tmp/{folder_id}"
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
         for i in range(len(discs)):
             bdinfo_text = None
             path = os.path.abspath(discs[i]['path'])
+            
+            # Check for existing BDInfo summary file
             for file in os.listdir(save_dir):
                 if file == f"BD_SUMMARY_{str(i).zfill(2)}.txt":
                     bdinfo_text = save_dir + "/" + file
-            if bdinfo_text == None or meta_discs == []:
+
+            if bdinfo_text is None or meta_discs == []:
                 if os.path.exists(f"{save_dir}/BD_FULL_{str(i).zfill(2)}.txt"):
                     bdinfo_text = os.path.abspath(f"{save_dir}/BD_FULL_{str(i).zfill(2)}.txt")
                 else:
                     bdinfo_text = ""
                     if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
                         try:
-                            # await asyncio.subprocess.Process(['mono', "bin/BDInfo/BDInfo.exe", "-w", path, save_dir])
+                            # Scan using BDInfo on Linux or macOS
                             console.print(f"[bold green]Scanning {path}")
                             proc = await asyncio.create_subprocess_exec('mono', f"{base_dir}/bin/BDInfo/BDInfo.exe", '-w', path, save_dir)
                             await proc.wait()
@@ -43,13 +48,15 @@ class DiscParse():
                             console.print('[bold red]mono not found, please install mono')
 
                     elif sys.platform.startswith('win32'):
-                        # await asyncio.subprocess.Process(["bin/BDInfo/BDInfo.exe", "-w", path, save_dir])
+                        # Scan using BDInfo on Windows
                         console.print(f"[bold green]Scanning {path}")
                         proc = await asyncio.create_subprocess_exec(f"{base_dir}/bin/BDInfo/BDInfo.exe", "-w", path, save_dir)
                         await proc.wait()
                         await asyncio.sleep(1)
                     else:
-                        console.print("[red]Not sure how to run bdinfo on your platform, get support please thanks.")
+                        console.print("[red]Not sure how to run BDInfo on your platform, get support please thanks.")
+                
+                # Retry to locate and parse BDInfo file
                 while True:
                     try:
                         if bdinfo_text == "":
@@ -63,14 +70,12 @@ class DiscParse():
                             result2 = result[1].rstrip(" \n")
                             result = result2.split("********************", 1)
                             bd_summary = result[0].rstrip(" \n")
-                            f.close()
-                        with open(bdinfo_text, 'r') as f: # parse extended BDInfo
+                        with open(bdinfo_text, 'r') as f: # Parse extended BDInfo
                             text = f.read()
                             result = text.split("[code]", 3)
                             result2 = result[2].rstrip(" \n")
                             result = result2.split("FILES:", 1)
                             ext_bd_summary = result[0].rstrip(" \n")
-                            f.close()
                         try:
                             shutil.copyfile(bdinfo_text, f"{save_dir}/BD_FULL_{str(i).zfill(2)}.txt")
                             os.remove(bdinfo_text)
@@ -81,15 +86,15 @@ class DiscParse():
                         await asyncio.sleep(5)
                         continue
                     break
+                
+                # Write summaries to files
                 with open(f"{save_dir}/BD_SUMMARY_{str(i).zfill(2)}.txt", 'w') as f:
                     f.write(bd_summary.strip())
-                    f.close()
-                with open(f"{save_dir}/BD_SUMMARY_EXT.txt", 'w') as f: # write extended BDInfo file
+                with open(f"{save_dir}/BD_SUMMARY_EXT.txt", 'w') as f: # Write extended BDInfo file
                     f.write(ext_bd_summary.strip())
-                    f.close()
                 
                 bdinfo = self.parse_bdinfo(bd_summary, files[1], path)
-        
+
                 discs[i]['summary'] = bd_summary.strip()
                 discs[i]['bdinfo'] = bdinfo
                 # shutil.rmtree(f"{base_dir}/tmp")
@@ -97,8 +102,7 @@ class DiscParse():
                 discs = meta_discs
         
         return discs, discs[0]['bdinfo']
-        
-            
+
 
     def parse_bdinfo(self, bdinfo_input, files, path):
         bdinfo = dict()
@@ -162,9 +166,9 @@ class DiscParse():
                 n = 0
                 if "Atmos" in split2[2].strip():
                     n = 1
-                    fuckatmos = split2[2].strip()
+                    dd_atmos = split2[2].strip()
                 else:
-                    fuckatmos = ""
+                    dd_atmos = ""
                 try:
                     bit_depth = split2[n+5].strip()
                 except:
@@ -176,7 +180,7 @@ class DiscParse():
                     'sample_rate' : split2[n+3].strip(), 
                     'bitrate' : split2[n+4].strip(), 
                     'bit_depth' : bit_depth, # Also DialNorm, but is not in use anywhere yet
-                    'atmos_why_you_be_like_this': fuckatmos,
+                    'dolby_atmos': dd_atmos,
                     })
             elif line.startswith("disc title:"):
                 title = l.split(':', 1)[1]
@@ -205,71 +209,80 @@ class DiscParse():
             except:
                 pass
         return bdinfo
-
-
     
-    """
-    Parse VIDEO_TS and get mediainfos
-    """
     async def get_dvdinfo(self, discs):
+        """
+        Get and parse DVD information for a list of discs.
+        """
         for each in discs:
             path = each.get('path')
             os.chdir(path)
             files = glob(f"VTS_*.VOB")
             files.sort()
-            # Switch to ordered dictionary
+            # Switch to ordered dictionary for better management
             filesdict = OrderedDict()
             main_set = []
+
             # Use ordered dictionary in place of list of lists
             for file in files:
                 trimmed = file[4:]
                 if trimmed[:2] not in filesdict:
                     filesdict[trimmed[:2]] = []
                 filesdict[trimmed[:2]].append(trimmed)
+
             main_set_duration = 0
+
             for vob_set in filesdict.values():
                 # Parse media info for this VOB set
                 vob_set_mi = MediaInfo.parse(f"VTS_{vob_set[0][:2]}_0.IFO", output='JSON')
                 vob_set_mi = json.loads(vob_set_mi)
                 vob_set_duration = vob_set_mi['media']['track'][1]['Duration']
-                      
                 
-                # If the duration of the new vob set > main set by more than 10% then it's our new main set
-                # This should make it so TV shows pick the first episode 
+                # Determine if this VOB set is the new main set
                 if (float(vob_set_duration) * 1.00) > (float(main_set_duration) * 1.10) or len(main_set) < 1:
                     main_set = vob_set
                     main_set_duration = vob_set_duration
+
             each['main_set'] = main_set
             set = main_set[0][:2]
             each['vob'] = vob = f"{path}/VTS_{set}_1.VOB"
             each['ifo'] = ifo = f"{path}/VTS_{set}_0.IFO"
-            each['vob_mi'] = MediaInfo.parse(os.path.basename(vob), output='STRING', full=False, mediainfo_options={'inform_version' : '1'}).replace('\r\n', '\n')
-            each['ifo_mi'] = MediaInfo.parse(os.path.basename(ifo), output='STRING', full=False, mediainfo_options={'inform_version' : '1'}).replace('\r\n', '\n')
-            each['vob_mi_full'] = MediaInfo.parse(vob, output='STRING', full=False, mediainfo_options={'inform_version' : '1'}).replace('\r\n', '\n')
-            each['ifo_mi_full'] = MediaInfo.parse(ifo, output='STRING', full=False, mediainfo_options={'inform_version' : '1'}).replace('\r\n', '\n')
             
-
-            size = sum(os.path.getsize(f) for f in os.listdir('.') if os.path.isfile(f))/float(1<<30)
+            # Parse media information for VOB and IFO files
+            each['vob_mi'] = MediaInfo.parse(os.path.basename(vob), output='STRING', full=False, mediainfo_options={'inform_version': '1'}).replace('\r\n', '\n')
+            each['ifo_mi'] = MediaInfo.parse(os.path.basename(ifo), output='STRING', full=False, mediainfo_options={'inform_version': '1'}).replace('\r\n', '\n')
+            each['vob_mi_full'] = MediaInfo.parse(vob, output='STRING', full=False, mediainfo_options={'inform_version': '1'}).replace('\r\n', '\n')
+            each['ifo_mi_full'] = MediaInfo.parse(ifo, output='STRING', full=False, mediainfo_options={'inform_version': '1'}).replace('\r\n', '\n')
+            
+            # Determine DVD size based on total file size
+            size = sum(os.path.getsize(f) for f in os.listdir('.') if os.path.isfile(f)) / float(1 << 30)
             if size <= 7.95:
                 dvd_size = "DVD9"
                 if size <= 4.37:
                     dvd_size = "DVD5"
             each['size'] = dvd_size
+
         return discs
-    
+
     async def get_hddvd_info(self, discs):
+        """
+        Get and parse information for the largest HDDVD EVO file in each disc's directory.
+        """
         for each in discs:
             path = each.get('path')
             os.chdir(path)
             files = glob("*.EVO")
-            size = 0
-            largest = files[0]
-            # get largest file from files
-            for file in files:
-                file_size = os.path.getsize(file)
-                if file_size > size:
-                    largest = file
-                    size = file_size
-            each['evo_mi'] = MediaInfo.parse(os.path.basename(largest), output='STRING', full=False, mediainfo_options={'inform_version' : '1'})
-            each['largest_evo'] = os.path.abspath(f"{path}/{largest}")
+            
+            if not files:
+                console.print(f"No EVO files found in {path}")
+                continue
+
+            # Find the largest EVO file
+            largest = max(files, key=os.path.getsize)
+            largest_size = os.path.getsize(largest)
+            
+            # Parse media information for the largest EVO file
+            each['evo_mi'] = MediaInfo.parse(os.path.basename(largest), output='STRING', full=False, mediainfo_options={'inform_version': '1'})
+            each['largest_evo'] = os.path.abspath(largest)
+        
         return discs
