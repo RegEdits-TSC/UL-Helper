@@ -691,12 +691,12 @@ class Prep():
                     debug = True
                 retake = False    
                 with Progress(
-                    TextColumn("[bold green]Saving Screens..."),
+                    TextColumn("[bold yellow]Saving Screens..."),
                     BarColumn(),
                     "[cyan]{task.completed}/{task.total}",
                     TimeRemainingColumn()
                 ) as progress:
-                    screen_task = progress.add_task("[green]Saving Screens...", total=num_screens)
+                    screen_task = progress.add_task("[bold yellow]Saving Screens...", total=num_screens)
                     ss_times = []
                     smallest_image_path = None
                     smallest_image_size = float('inf')
@@ -792,12 +792,12 @@ class Prep():
             looped = 0
             retake = False
             with Progress(
-                TextColumn("[bold green]Saving Screens..."),
+                TextColumn("[bold yellow]Saving Screens..."),
                 BarColumn(),
                 "[cyan]{task.completed}/{task.total}",
                 TimeRemainingColumn()
             ) as progress:
-                screen_task = progress.add_task("[green]Saving Screens...", total=num_screens)
+                screen_task = progress.add_task("[bold yellow]Saving Screens...", total=num_screens)
                 ss_times = []
                 smallest_image_path = None
                 smallest_image_size = float('inf')
@@ -945,13 +945,13 @@ class Prep():
                 else:
                     retake = False
                     with Progress(
-                        TextColumn("[bold green]Saving Screens..."),
+                        TextColumn("[bold yellow]Saving Screens..."),
                         BarColumn(),
                         "[cyan]{task.completed}/{task.total}",
                         TimeRemainingColumn()
                     ) as progress:
                         ss_times = []
-                        screen_task = progress.add_task("[green]Saving Screens...", total=num_screens)
+                        screen_task = progress.add_task("[bold yellow]Saving Screens...", total=num_screens)
                         smallest_image_path = None
                         smallest_image_size = float('inf')
                         
@@ -2052,8 +2052,8 @@ class Prep():
             exclude_globs = exclude or [],
             include_globs = include or [],
             creation_date = datetime.now(),
-            comment = "Created by Uploadrr",
-            created_by = "Created by Uploadrr")
+            comment = "Created by Upload Helper",
+            created_by = "Created by Upload Helper")
         file_size = torrent.size
         if file_size < 268435456: # 256 MiB File / 256 KiB Piece Size
             piece_size = 18
@@ -2076,13 +2076,13 @@ class Prep():
         else: # 16MiB Piece Size
             piece_size = 24
             piece_size_text = "16MiB"
-        console.print(f"[bold yellow]Creating .torrent with a piece size of {piece_size_text}... (No valid --torrenthash was provided to reuse)")
+        console.print(f"[bold yellow]Creating .torrent with a piece size of {piece_size_text}... (Use --torrenthash to reuse old hash)")
         if meta.get('torrent_creation') != None:
             torrent_creation = meta['torrent_creation']
         else:
             torrent_creation = self.config['DEFAULT'].get('torrent_creation', 'torf')
         if torrent_creation == 'torrenttools':
-            args = ['torrenttools', 'create', '-a', 'https://fake.tracker', '--private', 'on', '--piece-size', str(2**piece_size), '--created-by', "Created by Uploadrr", '--no-cross-seed','-o', f"{meta['base_dir']}/tmp/{meta['uuid']}/{output_filename}.torrent"]
+            args = ['torrenttools', 'create', '-a', 'https://fake.tracker', '--private', 'on', '--piece-size', str(2**piece_size), '--created-by', "Created by Upload Helper", '--no-cross-seed','-o', f"{meta['base_dir']}/tmp/{meta['uuid']}/{output_filename}.torrent"]
             if not meta['full_dir'] or meta['is_disc']:
                 args.extend(['--include', r'^.*\.(mkv|mp4|ts)$'])
             args.append(path)
@@ -2114,7 +2114,7 @@ class Prep():
                 "[progress.percentage]{task.percentage:>3.1f}%",
                 TimeRemainingColumn(),
             )
-            self.task = self.progress.add_task("Hashing...", total=pieces_total)
+            self.task = self.progress.add_task("[bold yellow]Hashing...", total=pieces_total)
             self.progress.start()
         self.progress.update(self.task, completed=pieces_done)
         if pieces_done >= pieces_total:
@@ -2134,8 +2134,8 @@ class Prep():
             base_torrent = Torrent.read(torrentpath)
             base_torrent.creation_date = datetime.now()
             base_torrent.trackers = ['https://fake.tracker']
-            base_torrent.comment = "Created by Uploadrr"
-            base_torrent.created_by = "Created by Uploadrr"
+            base_torrent.comment = "Created by Upload Helper"
+            base_torrent.created_by = "Created by Upload Helper"
             #Remove Un-whitelisted info from torrent
             for each in list(base_torrent.metainfo['info']):
                 if each not in ('files', 'length', 'name', 'piece length', 'pieces', 'private', 'source'):
@@ -2155,7 +2155,7 @@ class Prep():
     def upload_screens(self, meta, screens, img_host_num, i, total_screens, custom_img_list, return_dict):
         if int(total_screens) != 0 or len(meta.get('image_list', [])) > total_screens:
             if custom_img_list == []:
-                console.print('[yellow]Uploading Screens')   
+                console.print('[bold yellow]Screens will now begin uploading...')   
         os.chdir(f"{meta['base_dir']}/tmp/{meta['uuid']}")
         img_host = self.config['DEFAULT'][f'img_host_{img_host_num}']  
         if img_host != self.img_host and meta.get('imghost', None) == None: 
@@ -2177,7 +2177,7 @@ class Prep():
         if len(existing_images) < total_screens:
             if img_host == 'imgbox':
                 nest_asyncio.apply()
-                console.print("[green]Uploading Screens to Imgbox...")
+                console.print("[bold yellow]Uploading Screens to ImgBox...")
                 image_list = asyncio.run(self.imgbox_upload(f"{meta['base_dir']}/tmp/{meta['uuid']}", image_glob))
                 if image_list == []:
                     if img_host_num == 0:
@@ -2186,12 +2186,12 @@ class Prep():
                     image_list, i = self.upload_screens(meta, screens - i , img_host_num + 1, i, total_screens, [], return_dict)        
             else:
                 with Progress(
-                    TextColumn("[bold green]Uploading Screens..."),
+                    TextColumn("[bold yellow]Uploading Screens..."),
                     BarColumn(),
                     "[cyan]{task.completed}/{task.total}",
                     TimeRemainingColumn()
                 ) as progress:
-                    upload_task = progress.add_task(f"[green]Uploading Screens to {img_host}...", total = len(image_glob[-screens:]))
+                    upload_task = progress.add_task(f"[bold yellow]Uploading Screens to {img_host}...", total = len(image_glob[-screens:]))
                     timeout=60
                     for image in image_glob[-screens:]:        
                         if img_host == "imgbb":

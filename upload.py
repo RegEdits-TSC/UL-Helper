@@ -172,7 +172,7 @@ def reconfigure():
     # Final messages to the user
     console.print("Please double-check new config and ensure client settings were appropriately set.")
     console.print("[bold yellow]WARN[/bold yellow]: After verification of config, rerun command.")
-    console.print("[dim green]Thanks for using Uploadrr :)")
+    console.print("[dim green]Thanks for using Upload Helper.")
     exit()
     
 # Check if 'version' key is in config and if it's less than the minimum required version
