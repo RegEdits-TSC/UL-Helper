@@ -1,4 +1,3 @@
-import console
 from torf import Torrent
 import xmlrpc.client
 import bencode
@@ -12,6 +11,7 @@ import asyncio
 import ssl
 import shutil
 import time
+from src.console import console
 
 class Clients:
     """
