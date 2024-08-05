@@ -305,12 +305,6 @@ async def do_the_thing(base_dir):
         # Sort queue in case-insensitive order if 'auto_queue' key is set in meta
         queue = sorted(queue, key=str.lower)
         
-        
-        
-        
-        
-        
-
     # Iterate over each path in the queue
     for path in queue:
         # Create a copy of the base_meta dictionary and update with the current path
@@ -346,23 +340,45 @@ async def do_the_thing(base_dir):
 
 
 
+
+
+
         
+        # Print the current processing status
         console.print(Align.center(f"\n\n——— Processing # [bold bright_cyan]{current_file}[/bold bright_cyan] of [bold bright_magenta]{total_files}[/bold bright_magenta] ———"))
+
+        # Handle delay if specified
         if delay > 0:
             with Progress("[progress.description]{task.description}", TimeRemainingColumn(), transient=True) as progress:
                 task = progress.add_task("[cyan]Auto delay...", total=delay)
                 for i in range(delay):
                     await asyncio.sleep(1)
                     progress.update(task, advance=1)
+
+        # Print information gathering status
         console.print(f"[green]Gathering info for {os.path.basename(path)}")
+
+        # Set default image host if not provided
         if meta['imghost'] is None:
             meta['imghost'] = config['DEFAULT']['img_host_1']
+
+        # Notify if running in auto mode
         if meta['unattended']:
             console.print("[yellow]Running in Auto Mode")
-                
+
+        # Increment the current file counter
         current_file += 1
+
+        # Initialize the Prep object and gather preparation data
         prep = Prep(screens=meta.get('screens', 3), img_host=meta.get('imghost', 'imgbox'), config=config)
         meta = await prep.gather_prep(meta=meta, mode='cli')
+
+
+
+
+
+
+
 
         # Gather TMDb ID
         if meta.get('tmdb_not_found'):
