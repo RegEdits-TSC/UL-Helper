@@ -1,89 +1,141 @@
-# ![Uploadrr by CvT](https://i.ibb.co/2NVWb0c/uploadrr.webp)
+# Upload Helper
 
-I have no clue what I'm doing so thought I'd fork it, bork it and, duct tape it back together to get people to sing my praises. 
-Hopefully it works and makes your life simplier.
+Welcome to Upload Helper! This tool is designed to simplify media uploading tasks by automating several processes. It might not be perfect, but it aims to make your life easier.
 
-## What It Can Do:
-  - Generates and Parses MediaInfo/BDInfo.
-  - Generates and Uploads screenshots.
-  - Uses srrdb to fix scene filenames
-  - Can grab descriptions from PTP (automatically on filename match or arg) / BLU (arg)
-  - Obtains TMDb/IMDb/MAL identifiers.
-  - Converts absolute to season episode numbering for Anime
-  - Generates custom .torrents without useless top level folders/nfos.
-  - Can re-use existing torrents instead of hashing new
-  - Generates proper name for your upload using Mediainfo/BDInfo and TMDb/IMDb conforming to site rules
-  - Checks for existing releases already on site
-  - Manual or Automated Queuing 
-  - Adds to your client with fast resume, seeding instantly (rtorrent/qbittorrent/deluge/watch folder)
-  - ALL WITH MINIMAL INPUT!
-  - Currently works with .mkv/.mp4/Blu-ray/DVD/HD-DVDs (or anything if --full-directory is applied)
+> [!NOTE]
+> This project is a fork of an existing repository, which I have customized and maintained according to my specific needs. While it retains core functionality from the original project, there may be slight variations to better suit my use cases. You are welcome to use this fork as you see fit.
+
+## Features
+  - **Media Information:** Generates and parses MediaInfo/BDInfo.
+  - **Screenshots:** Generates and uploads screenshots.
+  - **Filename Correction:** Uses srrdb to fix scene filenames.
+  - **Descriptions:** Retrieves descriptions from PTP (automatically on filename match or via argument) / BLU (via argument).
+  - **Identifiers:** Obtains TMDb/IMDb/MAL identifiers.
+  - **Anime Season/Episode Numbering:** Converts absolute to season and episode numbering for anime.
+  - **Custom Torrents:** Generates custom .torrents without unnecessary top-level folders or .nfo files.
+  - **Reuse Torrents:** Reuses existing torrents instead of creating new ones.
+  - **Naming:** Generates appropriate names for your uploads using MediaInfo/BDInfo and TMDb/IMDb, conforming to site rules.
+  - **Duplicate Check:** Checks for existing releases on the site.
+  - **Queuing:** Supports manual or automated queuing.
+  - **Client Integration:** Adds to your client with fast resume, seeding instantly (compatible with rtorrent/qbittorrent/deluge/watch folder).
+  - **Minimal Input Required:** Operates with minimal user input.
+  - **File Formats:** Currently supports .mkv, .mp4, Blu-ray, DVD, HD-DVDs (or any format with --full-directory applied).
 
 ## Supported Sites
 
-|      |      |      |      |      |      |      |      |
-|------|------|------|------|------|------|------|------|
-| ACM  | AITHER | ANT  | BHDTV | BLU  | FL   | FNP  | HDB  |
-| HDT  | HUNO   | JPTV | LCD   | LDU  | LST  | LT   | MB   |
-| MTV  | NBL    | OE   | OINK  | OTW  | PTER | PTT  | R4E  |
-| RF   | RTF    | SN   | STC   | TDC  | TL   | TTG  | TTR  |
-| ULCX | UTP    | VHD  |      |      |      |      |      |
+<details>
 
+<summary>Click Here For Sites List</summary>
 
+| Site  |
+|-------|
+| ACM   |
+| AITHER|
+| ANT   |
+| BHDTV |
+| BLU   |
+| FL    |
+| FNP   |
+| HDB   |
+| HDT   |
+| HUNO  |
+| JPTV  |
+| LCD   |
+| LDU   |
+| LST   |
+| LT    |
+| MB    |
+| MTV   |
+| NBL   |
+| OE    |
+| OINK  |
+| OTW   |
+| PTER  |
+| PTT   |
+| R4E   |
+| RF    |
+| RTF   |
+| SN    |
+| STC   |
+| TDC   |
+| TL    |
+| TTG   |
+| TTR   |
+| ULCX  |
+| UTP   |
+| VHD   |
 
+</details>
 
+> [!TIP]
+> To ensure proper functionality with Upload Helper, please use the exact site names as listed here. For instance, "Aither" should be referred to as "AITHER" rather than "ATH". This requirement applies to all sites listed, so please verify that you are using the correct name.
 
+## Upcoming Features
+  - Enhanced support for FANRES & Adult Content.
+  - Improved support for Music & Ebooks.
 
-
-## Coming Soon:
-  - Better support for FANRES & Adult Content
-  - Better support for Music & Ebooks 
-
-  
-
-## **Setup:**
-   - **REQUIRES AT LEAST PYTHON 3.7 AND PIP3**
-     (Note: _If using Python 3.7 you must ``pip3 install qbittorrent-api==2023.9.53`` or lower version any more recent version requires Python 3.8+_)
-   - Needs [mono](https://www.mono-project.com/) on linux systems for BDInfo
-   - Also needs MediaInfo and ffmpeg installed on your system
-      - On Windows systems, ffmpeg must be added to PATH I recomend using https://scoop.sh/ , alternatively follow this guide for manual installation (https://windowsloop.com/install-ffmpeg-windows-10/) 
-      - On linux systems, get it from your favorite package manager
-      - On Mac OS either install in brew, or get static builds and place in `/usr/bin` or (better practice) create your own bin ex:`$HOME/.local/bin` then edit `$HOME/.zshrc` by adding export `PATH="$PATH:$HOME/.local/bin"`
-   - Clone the repo to your system `git clone https://github.com/z-ink/Uploadrr.git`
-   - Copy and Rename from `data/backup/example-config.py` to `data/config.py`
-   - Edit `config.py` to use your information (more detailed information in the [wiki](https://github.com/L4GSP1KE/Upload-Assistant/wiki))
-      - tmdb_api (v3) key can be obtained from https://developers.themoviedb.org/3/getting-started/introduction
-      - image host api keys can be obtained from their respective sites
-   - Install necessary python modules `pip3 install --user -U -r requirements.txt`
-     
+## Setup
+1) **Prerequisites:**
+   - Python 3.7 or higher, with pip3.
+     - For Python 3.7, install qbittorrent-api==2023.9.53 or a compatible version.
+   - [Mono](https://www.mono-project.com/) is required on Linux systems for BDInfo.
+   - MediaInfo and ffmpeg must be installed.
+2) **Installation:**
+   - **Windows:** Add ffmpeg to PATH. Use [Scoop](https://scoop.sh/) for easy installation or follow this [manual guide](https://windowsloop.com/install-ffmpeg-windows-10/).
+   - **Linux:** Install ffmpeg via your package manager.
+   - **MacOS:** Install ffmpeg using Homebrew or place static builds in `/usr/bin` or `$HOME/.local/bin`. Update PATH in `$HOME/.zshrc` with `export PATH="$PATH:$HOME/.local/bin"`.
+3) **Clone the Repository:**
+     ```
+     git clone https://github.com/RegEdits-TSC/Uploader-Helper.git
+     ```
+4) **Configure:**
+   - Copy and rename `data/backup/example-config.py` to `data/config.py`.
+   - Edit `config.py` with your information. Detailed instructions are available in the [wiki](https://github.com/L4GSP1KE/Upload-Assistant/wiki).
+     - Obtain a TMDb API (v3) key from [TMDb](https://developer.themoviedb.org/docs/getting-started).
+     - Acquire image host API keys from their respective sites.
+   - Install necessary Python modules:
+     ```
+     pip3 install --user -U -r requirements.txt
+     ```    
    
+## Updating
+To update your installation:
+1) Navigate to the Uploader-Helper directory:
+   ```
+   cd Uploader-Helper
+   ```
+2) Pull the latest changes:
+   ```
+   git pull
+   ```
+3) Update Python dependencies:
+   ```
+   python3 -m pip install --user -U -r requirements.txt
+   ```
 
-## **Updating:**
-  - To update first navigate into the Upload-Assistant directory: `cd Upload-Assistant`
-  - Run a `git pull` to grab latest updates
-  - Run `python3 -m pip3 install --user -U -r requirements.txt` to ensure dependencies are up to date
-## **CLI Usage:**
-  
-  `python3 upload.py "/downloads/path/to/media" --args`
-  
-  Args are OPTIONAL, for a list of acceptable args, pass `--help`  
-  For an overview of all arguments with descriptions plea see [Uploadrr Argument List](https://theldu.org/index.php/Uploadrr) Thanks **GME**!
-## **Docker Usage:**
-  Many thanks to **l1mo** for helping set the Dockerfile up.  
-  Thanks to **dare** for the following command to have everything running smoothly.  
-  Either:
+## CLI Usage
 
+Run the tool using:
+```
+python3 upload.py "/path/to/media" --args
+```
+Example: 
+```
+python3 upload.py "/home/regedits/torrents/qbittorrent/uploads/Avengers.Age.of.Ultron.2015.2160p.DSNP.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-RegEdits.mkv" --args -tk AITHER -ns -pr -d [code]This release is sourced from DisneyPlus[/code] -s 5 -c movie -tmdb 99861 -edition hybrid -webdv
+```
+
+Arguments are optional. For a list of acceptable arguments, use `--help`. For an overview of arguments with descriptions, navigate to the `arguments.txt` file in the main directory.
+
+## Docker Usage
+Special thanks to __l1mo__ for the Dockerfile setup and __dare__ for the command. Run the tool using Docker with one of the following commands:
 ```
 docker run --rm -it --network=host \
 -v /path/to/config.py:/Uploadrr/data/config.py \
 -v /path/to/media:/media \
 -v /path/to/BT_backup:/BT_backup \
 ghcr.io/z-ink/uploadrr:master "/path/to/media" --args
-```  
-Or:
+```
+__OR__
 ```
 docker run --rm -it --network=host -v /path/to/config.py:/Uploadrr/data/config.py -v /path/to/media:/media -v /path/to/BT_backup:/BT_backup ghcr.io/z-ink/uploadrr:master "/path/to/media" --args
 ```
-
-
-Hopefully it works for you! Otherwise try checking [docker usage wiki page](https://github.com/L4GSP1KE/Upload-Assistant/wiki/Docker) for inspiration. 
