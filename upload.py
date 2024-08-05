@@ -366,16 +366,6 @@ async def do_the_thing(base_dir):
         prep = Prep(screens=meta.get('screens', 3), img_host=meta.get('imghost', 'imgbox'), config=config)
         meta = await prep.gather_prep(meta=meta, mode='cli')
 
-
-
-
-
-
-
-
-
-
-
         # Gather TMDb ID
         if meta.get('tmdb_not_found'):
             skipped_files += 1
@@ -406,40 +396,71 @@ async def do_the_thing(base_dir):
             # meta['uploaded_screens'] = True
         elif meta.get('skip_imghost_upload', False) and not meta.get('image_list', False):
             meta['image_list'] = []
-
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             
 
 
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+
+        # Check if the base torrent file exists
         if not os.path.exists(os.path.abspath(f"{meta['base_dir']}/tmp/{meta['uuid']}/BASE.torrent")):
             reuse_torrent = None
+            
+            # If 'rehash' is not set, try to find an existing torrent to reuse
             if not meta.get('rehash', False):
                 reuse_torrent = await client.find_existing_torrent(meta)
-                if reuse_torrent != None:
+                
+                # If an existing torrent is found, create a base from it
+                if reuse_torrent is not None:
                     prep.create_base_from_existing_torrent(reuse_torrent, meta['base_dir'], meta['uuid'])
+            
+            # If no hash is required and no existing torrent was found, create a new torrent
             if not meta['nohash'] and reuse_torrent is None:
                 prep.create_torrent(meta, Path(meta['path']), "BASE", meta.get('piece_size_max', 0))
+            
+            # If hashing is not required, set the client to "none"
             if meta['nohash']:
                 meta['client'] = "none"
+        
+        # If the base torrent file exists and rehash is enabled, create a new torrent
         elif os.path.exists(os.path.abspath(f"{meta['base_dir']}/tmp/{meta['uuid']}/BASE.torrent")) and meta.get('rehash', False) is True and meta['nohash'] is False:
             prep.create_torrent(meta, Path(meta['path']), "BASE", meta.get('piece_size_max', 0))
+        
+        # If randomization is enabled, create random torrents
         if int(meta.get('randomized', 0)) >= 1:
             prep.create_random_torrents(meta['base_dir'], meta['uuid'], meta['randomized'], meta['path'])
+
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
         if meta.get('trackers', None) != None:
             trackers = meta['trackers']
