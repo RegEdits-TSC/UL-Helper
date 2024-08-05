@@ -337,15 +337,8 @@ async def do_the_thing(base_dir):
             # If the file does not exist, continue without updating meta
             pass
 
-
-
-
-
-
-
-        
         # Print the current processing status
-        console.print(Align.center(f"\n\n——— Processing # [bold bright_cyan]{current_file}[/bold bright_cyan] of [bold bright_magenta]{total_files}[/bold bright_magenta] ———"))
+        console.print(Align.center(f"\n\n————————— Upload Helper is processing # [bold bright_cyan]{current_file}[/bold bright_cyan] of [bold bright_magenta]{total_files}[/bold bright_magenta] —————————"))
 
         # Handle delay if specified
         if delay > 0:
@@ -380,6 +373,9 @@ async def do_the_thing(base_dir):
 
 
 
+
+
+
         # Gather TMDb ID
         if meta.get('tmdb_not_found'):
             skipped_files += 1
@@ -387,22 +383,47 @@ async def do_the_thing(base_dir):
             continue
 
         try:
+            # Retrieve name details
             meta['name_notag'], meta['name'], meta['clean_name'], meta['potential_missing'] = await prep.get_name(meta)
+            
+            # Ensure all name values are present
             if any(val is None for val in (meta['name_notag'], meta['name'], meta['clean_name'], meta['potential_missing'])):
                 raise ValueError("Name values are None")
         except Exception as e:
+            # Handle errors during name retrieval
             skipped_files += 1
             skipped_details.append((path, f'Error getting name: {str(e)}'))
             continue
 
+        # Handle image list and upload
         if meta.get('image_list', False) in (False, []) and meta.get('skip_imghost_upload', False) == False:
             return_dict = {}
-            meta['image_list'], dummy_var = prep.upload_screens(meta, meta['screens'], 1, 0, meta['screens'],[], return_dict)
+            meta['image_list'], dummy_var = prep.upload_screens(meta, meta['screens'], 1, 0, meta['screens'], [], return_dict)
+            
+            # Print image list if debugging
             if meta['debug']:
                 console.print(meta['image_list'])
             # meta['uploaded_screens'] = True
         elif meta.get('skip_imghost_upload', False) and not meta.get('image_list', False):
             meta['image_list'] = []
+
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
 
 
         if not os.path.exists(os.path.abspath(f"{meta['base_dir']}/tmp/{meta['uuid']}/BASE.torrent")):
