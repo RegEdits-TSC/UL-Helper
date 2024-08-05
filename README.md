@@ -86,7 +86,7 @@ Welcome to Upload Helper! This tool is designed to simplify media uploading task
    - **MacOS:** Install ffmpeg using Homebrew or place static builds in `/usr/bin` or `$HOME/.local/bin`. Update PATH in `$HOME/.zshrc` with `export PATH="$PATH:$HOME/.local/bin"`.
 3) **Clone the Repository:**
      ```
-     git clone https://github.com/RegEdits-TSC/Uploader-Helper.git
+     git clone https://github.com/RegEdits-TSC/UL-Helper.git
      ```
 4) **Configure:**
    - Copy and rename `data/backup/example-config.py` to `data/config.py`.
@@ -100,9 +100,9 @@ Welcome to Upload Helper! This tool is designed to simplify media uploading task
    
 ## Updating
 To update your installation:
-1) Navigate to the Uploader-Helper directory:
+1) Navigate to the UL-Helper directory:
    ```
-   cd Uploader-Helper
+   cd UL-Helper
    ```
 2) Pull the latest changes:
    ```
