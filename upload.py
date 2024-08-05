@@ -397,28 +397,6 @@ async def do_the_thing(base_dir):
         elif meta.get('skip_imghost_upload', False) and not meta.get('image_list', False):
             meta['image_list'] = []
             
-            
-
-
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-
-
         # Check if the base torrent file exists
         if not os.path.exists(os.path.abspath(f"{meta['base_dir']}/tmp/{meta['uuid']}/BASE.torrent")):
             reuse_torrent = None
@@ -447,51 +425,94 @@ async def do_the_thing(base_dir):
         if int(meta.get('randomized', 0)) >= 1:
             prep.create_random_torrents(meta['base_dir'], meta['uuid'], meta['randomized'], meta['path'])
 
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        if meta.get('trackers', None) != None:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # Determine the list of trackers to use, defaulting to configuration if not provided
+        if meta.get('trackers', None) is not None:
             trackers = meta['trackers']
         else:
             trackers = config['TRACKERS']['default_trackers']
+        
+        # Split trackers into a list if they are comma-separated
         if "," in trackers:
             trackers = trackers.split(',')
-        with open (f"{meta['base_dir']}/tmp/{meta['uuid']}/meta.json", 'w') as f:
+        
+        # Save the updated meta information to a JSON file
+        with open(f"{meta['base_dir']}/tmp/{meta['uuid']}/meta.json", 'w') as f:
             json.dump(meta, f, indent=4)
-            f.close()
-        confirm = get_confirmation(meta)  
+        
+        # Get user confirmation for the current meta information
+        confirm = get_confirmation(meta)
+        
+        # Loop until valid confirmation is received or user decides to skip
         while not confirm:
-            # help.print_help()
-            console.print("Input args that need correction e.g.(--tag NTb --category tv --tmdb 12345)")  
+            # Display instructions for editing meta information
+            console.print("Input args that need correction e.g.(--tag NTb --category tv --tmdb 12345)")
             console.print("Enter 'skip' if no correction needed", style="dim")
+            
+            # Prompt user for input
             editargs = Prompt.ask("")
+            
+            # If user chooses to skip, exit the loop
             if editargs.lower() == 'skip':
                 break
+            
+            # Validate user input
             elif editargs == '':
                 console.print("Invalid input. Please try again or type 'skip' to pass.", style="dim")
             else:
+                # Prepare arguments for parsing
                 editargs = (meta['path'],) + tuple(editargs.split())
                 if meta['debug']:
                     editargs = editargs + ("--debug",)
+                
+                # Parse the new arguments and update meta information
                 meta, help, before_args = parser.parse(editargs, meta)
                 meta['edit'] = True
-                meta = await prep.gather_prep(meta=meta, mode='cli') 
+                meta = await prep.gather_prep(meta=meta, mode='cli')
                 meta['name_notag'], meta['name'], meta['clean_name'], meta['potential_missing'] = await prep.get_name(meta)
+                
+                # Recheck confirmation with updated meta information
                 confirm = get_confirmation(meta)
+                
+                # Exit loop if confirmation is received
                 if confirm:
                     break
+
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
 
         if not isinstance(trackers, list):
             trackers = [trackers]
