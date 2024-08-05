@@ -204,12 +204,6 @@ async def do_the_thing(base_dir):
         # Notify user of successful cleanup
         console.print("[bold green]Successfully emptied the tmp directory...")
         
-        
-       
-       
-       
-       
-        
     # Check if auto-queuing is enabled
     if meta.get('auto_queue'):
         directory = meta['auto_queue']
@@ -298,23 +292,35 @@ async def do_the_thing(base_dir):
 
 
 
+
+    # Retrieve delay settings, defaulting to 0 if not specified
     delay = meta.get('delay', 0) or config['AUTO'].get('delay', 0)
-    base_meta = {k: v for k, v in meta.items()}
 
-    # Initialize counters
-    total_files = len(queue)
-    successful_uploads = 0
-    skipped_files = 0
-    skipped_details = []
-    skipped_tmdb_files = []
-    current_file = 1
+    # Create a copy of meta for use in processing
+    base_meta = dict(meta)  # Simplified copy creation
 
+    # Initialize counters and lists for tracking progress
+    total_files = len(queue)  # Total number of files in the queue
+    successful_uploads = 0  # Counter for successful uploads
+    skipped_files = 0  # Counter for skipped files
+    skipped_details = []  # List to store details of skipped files
+    skipped_tmdb_files = []  # List to store details of skipped TMDB files
+    current_file = 1  # Counter to track the current file being processed
+
+    # Sort or shuffle the queue based on user preferences
     if meta.get('random'):
+        # Shuffle queue randomly if 'random' key is set in meta
         random.shuffle(queue)
     elif meta.get('auto_queue'):
+        # Sort queue in case-insensitive order if 'auto_queue' key is set in meta
         queue = sorted(queue, key=str.lower)
-    else:
-        queue = queue
+        
+        
+        
+        
+        
+        
+
 
     for path in queue:
         meta = {k: v for k, v in base_meta.items()}
@@ -343,7 +349,7 @@ async def do_the_thing(base_dir):
                 for i in range(delay):
                     await asyncio.sleep(1)
                     progress.update(task, advance=1)
-        console.print(f"[green]Gathering information for {os.path.basename(path)} | Please wait...")
+        console.print(f"[green]Gathering information for {os.path.basename(path)} [/green][bold yellow]| Please wait...")
         if meta['imghost'] is None:
             meta['imghost'] = config['DEFAULT']['img_host_1']
         if meta['unattended']:
@@ -405,7 +411,7 @@ async def do_the_thing(base_dir):
         confirm = get_confirmation(meta)  
         while not confirm:
             # help.print_help()
-            console.print("Input args that need correction e.g.(--tag NTb --category tv --tmdb 12345)")  
+            console.print("Input args that need correction e.g.(--tag RegEdits --category movie --tmdb 12345)")  
             console.print("Enter 'skip' if no correction needed", style="dim")
             editargs = Prompt.ask("")
             if editargs.lower() == 'skip':
