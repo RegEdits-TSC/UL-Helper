@@ -1,52 +1,75 @@
-import requests
-from src.args import Args
-from src.clients import Clients
-from src.prep import Prep
-from src.trackers.COMMON import COMMON
-import json
-from pathlib import Path
-import asyncio
-import os
-import sys
-import re
-import platform
-import multiprocessing
-import logging
-import shutil
-import glob
-import subprocess
-import traceback
-import time
-import random
-from packaging.version import Version
-from src.console import console
-from rich.markdown import Markdown
-from rich.style import Style
-from rich.prompt import Prompt, Confirm
-from rich.text import Text
-from rich.panel import Panel
-from rich.table import Table
-from rich.align import Align
-from rich.rule import Rule
-from rich.console import Group
-from rich.progress import Progress, TimeRemainingColumn
-from difflib import SequenceMatcher
-import bencodepy as bencode
-from urllib.parse import urlparse, parse_qs
-import importlib
+# Standard Library Imports
+import json  # For handling JSON data
+import os  # For operating system interactions
+import sys  # For system-specific parameters and functions
+import re  # For regular expressions
+import platform  # For platform-specific information
+import time  # For time-related functions
+import random  # For generating random numbers
+import logging  # For logging messages
+import shutil  # For high-level file operations
+import glob  # For filename pattern matching
+import subprocess  # For spawning new processes
+import traceback  # For extracting, formatting, and printing stack traces
+import asyncio  # For asynchronous programming
+import multiprocessing  # For process-based parallelism
+from pathlib import Path  # For filesystem paths
+from urllib.parse import urlparse, parse_qs  # For URL parsing
+from difflib import SequenceMatcher  # For comparing sequences
+
+# Third-Party Imports
+import requests  # For making HTTP requests
+from packaging.version import Version  # For comparing versions
+import bencodepy as bencode  # For Bencode encoding/decoding
+from rich.markdown import Markdown  # For rendering Markdown
+from rich.style import Style  # For styling Rich text
+from rich.prompt import Prompt, Confirm  # For user prompts
+from rich.text import Text  # For Rich text handling
+from rich.panel import Panel  # For creating panels
+from rich.table import Table  # For creating tables
+from rich.align import Align  # For text alignment
+from rich.rule import Rule  # For creating rules
+from rich.console import Group  # For grouping Rich elements
+from rich.progress import Progress, TimeRemainingColumn  # For progress bars and timers
+
+# Custom Imports
+from src.args import Args  # Custom module, likely for argument parsing
+from src.clients import Clients  # Custom module, likely for client handling
+from src.prep import Prep  # Custom module, likely for preparation steps
+from src.trackers.COMMON import COMMON  # Custom module, common tracker functionalities
+from src.console import console  # Custom module, likely for console operations
+import importlib  # For dynamic imports
 
 ####################################
 #######  Tracker List Here   #######
 ### Add below + api or http list ###
 ####################################
-tracker_list = ['ACM', 'AITHER', 'ANT', 'BHD', 'BHDTV', 'BLU', 'FL', 'FNP', 'HDB', 'HDT', 'HUNO', 'JPTV', 'LCD', 'LDU', 'LST', 'LT',
-                'MB', 'MTV', 'NBL', 'OE', 'OINK', 'OTW', 'PTER', 'PTT', 'R4E', 'RF', 'RTF', 'SN', 'STC', 'TDC', 'TL', 'TTG', 'TTR', 'ULCX', 'UTP', 'VHD']
 
-# Imports corresponding modules + creates dict
-tracker_class_map = {tracker: getattr(importlib.import_module(f"src.trackers.{tracker}"), tracker) for tracker in tracker_list}
+# List of tracker names used in the project
+tracker_list = [
+    'ACM', 'AITHER', 'ANT', 'BHD', 'BHDTV', 'BLU', 'FL', 'FNP', 'HDB', 'HDT', 'HUNO', 'JPTV', 
+    'LCD', 'LDU', 'LST', 'LT', 'MB', 'MTV', 'NBL', 'OE', 'OINK', 'OTW', 'PTER', 'PTT', 'R4E', 
+    'RF', 'RTF', 'SN', 'STC', 'TDC', 'TL', 'TTG', 'TTR', 'ULCX', 'UTP', 'VHD'
+]
 
-api_trackers = ['ACM', 'AITHER', 'ANT', 'BHD', 'BHDTV', 'BLU', 'FNP', 'HUNO', 'JPTV', 'LCD', 'LDU', 'LST', 'LT', 'MB', 'NBL', 'OE', 'OINK', 'OTW', 'PTT', 'RF', 'R4E', 'RTF', 'SN', 'STC', 'TDC', 'TTR', 'ULCX', 'UTP', 'VHD']
-http_trackers = ['FL', 'HDB', 'HDT', 'MTV', 'PTER', 'TTG']
+# Creates a dictionary mapping each tracker name to its class from src.trackers module
+# Assumes each tracker has a corresponding module in src.trackers and the module's name is the same as the tracker
+tracker_class_map = {
+    tracker: getattr(importlib.import_module(f"src.trackers.{tracker}"), tracker) 
+    for tracker in tracker_list
+}
+
+# Trackers using API-based interaction
+api_trackers = [
+    'ACM', 'AITHER', 'ANT', 'BHD', 'BHDTV', 'BLU', 'FNP', 'HUNO', 'JPTV', 'LCD', 'LDU', 'LST', 
+    'LT', 'MB', 'NBL', 'OE', 'OINK', 'OTW', 'PTT', 'RF', 'R4E', 'RTF', 'SN', 'STC', 'TDC', 
+    'TTR', 'ULCX', 'UTP', 'VHD'
+]
+
+# Trackers using HTTP-based interaction
+http_trackers = [
+    'FL', 'HDB', 'HDT', 'MTV', 'PTER', 'TTG'
+]
 
 ############# EDITING BELOW THIS LINE MAY RESULT IN SCRIPT BREAKING #############
 
