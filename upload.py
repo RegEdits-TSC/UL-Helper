@@ -502,21 +502,35 @@ async def do_the_thing(base_dir):
         
         
         
+
+
+
+
+
+        # Iterate through each tracker in the list
         for tracker in trackers:
+            # Remove 'DUPE?' from the end of the meta name if present
             if meta['name'].endswith('DUPE?'):
                 meta['name'] = meta['name'].replace(' DUPE?', '')
+            
+            # Clean and format the tracker name
             tracker = tracker.replace(" ", "").upper().strip()
-            if meta['debug']:
-                debug = "(DEBUG)"
-            else:
-                debug = ""
+            
+            # Set debug flag for logging purposes
+            debug = "(DEBUG)" if meta['debug'] else ""
 
+            # Check if the tracker is in the list of API-supported trackers
             if tracker in api_trackers:
+                # Initialize the tracker class using the tracker_class_map
                 tracker_class = tracker_class_map[tracker](config=config)
+                
+                # Determine if upload should proceed based on the unattended flag
                 if meta['unattended']:
                     upload_to_tracker = True
                 else:
                     upload_to_tracker = Confirm.ask(f"Upload to {tracker_class.tracker}? {debug}")
+                
+                # If upload is confirmed, print the upload message; otherwise, log the skip and continue
                 if upload_to_tracker:
                     console.print(f"Uploading to {tracker_class.tracker}")
                 else:
@@ -524,28 +538,63 @@ async def do_the_thing(base_dir):
                     skipped_files += 1
                     skipped_details.append((path, f"User skipped Upload on {tracker_class.tracker}"))
                     continue
+                
+                # Check if the tracker is banned or has banned groups
                 if check_banned_group(tracker_class.tracker, tracker_class.banned_groups, meta, skipped_details, path):
                     skipped_files += 1
                     skipped_details.append((path, f"Banned Group on {tracker_class.tracker}"))
                     continue
+                
+                # Search for existing items on the tracker and filter duplicates
                 dupes = await tracker_class.search_existing(meta)
                 dupes = await common.filter_dupes(dupes, meta)
-                meta, skipped = dupe_check(dupes, meta, config, skipped_details, path)                    
+                meta, skipped = dupe_check(dupes, meta, config, skipped_details, path)
+                
+                # If duplicate check indicates a skip, log it and continue
                 if skipped:
                     skipped_files += 1
                     skipped_details.append((path, f"Potential duplicate on {tracker_class.tracker}"))
-                    continue                        
+                    continue
+                
+                # If upload is confirmed, perform the upload
                 if meta['upload']:
-                    #await tracker_class.upload(meta)    
+                    # Perform the upload and handle success or failure
                     upload_success = await tracker_class.upload(meta)
                     if upload_success:
                         if tracker == 'SN':
-                            await asyncio.sleep(16)
+                            await asyncio.sleep(16)  # Delay specific to 'SN' tracker
                         await client.add_to_client(meta, tracker_class.tracker)
                         successful_uploads += 1
                     else:
                         skipped_files += 1
                         skipped_details.append((path, f"{tracker_class.tracker} Rejected Upload"))
+
+
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
             
             if tracker in http_trackers:
                 tracker_class = tracker_class_map[tracker](config=config)
