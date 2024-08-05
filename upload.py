@@ -172,9 +172,6 @@ except Exception as e:
 client = Clients(config=config)
 parser = Args(config)
 
-
-
-
 async def do_the_thing(base_dir):
     # Print a banner (assumed to be a function that displays some introductory text)
     print_banner()
@@ -208,76 +205,110 @@ async def do_the_thing(base_dir):
         console.print("[bold green]Successfully emptied the tmp directory...")
         
         
+       
+       
+       
+       
         
-        
-
+    # Handle automatic queuing based on 'auto_queue' metadata
     if meta.get('auto_queue'):
         directory = meta['auto_queue']
+        
         if os.path.isdir(directory):
             queue = list_directory(directory)
+            
             if meta.get('show_queue') or meta.get('debug'):
                 md_text = "\n - ".join(queue)
                 console.print("\n[bold green]Automatically queuing these files:[/bold green]", end='')
                 console.print(Markdown(f"- {md_text.rstrip()}\n\n", style=Style(color='cyan')))
+                
             console.print(f"\nUnique uploads queued: [bold cyan]{len(queue)}[/bold cyan]")
         else:
             console.print(f"[red]Directory: [bold red]{directory}[/bold red] does not exist")
             exit(1)
     else:
-        if not meta['path']:
+        # Handle queuing based on 'path' metadata
+        path = meta.get('path', None)
+        if not path:
             exit(0)
-        path = meta['path']
+        
         path = os.path.abspath(path)
+        
         if path.endswith('"'):
             path = path[:-1]
-        queue = []
+        
         if os.path.exists(path):
-            meta, help, before_args = parser.parse(tuple(' '.join(sys.argv[1:]).split(' ')), meta)
+            # Parse arguments and queue single path if it exists
+            meta, help_text, before_args = parser.parse(
+                tuple(' '.join(sys.argv[1:]).split(' ')), meta
+            )
             queue = [path]
         else:
-            if os.path.exists(os.path.dirname(path)) and len(paths) <= 1:
-                escaped_path = path.replace('[', '[[]')
-                globs = glob.glob(escaped_path)
-                queue = globs
-                if len(queue) != 0:
+            # Handle cases where the path may include glob patterns or multiple paths
+            dir_path = os.path.dirname(path)
+            
+            if os.path.exists(dir_path):
+                if len(paths) <= 1:
+                    # Use glob to match patterns if path is a pattern
+                    escaped_path = path.replace('[', '[[]')
+                    queue = glob.glob(escaped_path)
+                    
+                    if queue:
+                        if meta.get('show_queue') or meta.get('debug'):
+                            md_text = "\n - ".join(queue)
+                            console.print("\n[bold green]Queuing these files:[/bold green]", end='')
+                            console.print(Markdown(f"- {md_text.rstrip()}\n\n", style=Style(color='cyan')))
+                        
+                        console.print(f"\nUnique Uploads Queued: [bold cyan]{len(queue)}[/bold cyan]\n")
+                    else:
+                        console.print(f"[red]Path: [bold red]{path}[/bold red] does not exist")
+                else:
+                    # Queue all provided paths
+                    queue = paths
                     if meta.get('show_queue') or meta.get('debug'):
                         md_text = "\n - ".join(queue)
                         console.print("\n[bold green]Queuing these files:[/bold green]", end='')
                         console.print(Markdown(f"- {md_text.rstrip()}\n\n", style=Style(color='cyan')))
-                    console.print(f"\nUnique Uploads Queued: [bold cyan]{len(queue)}[/bold cyan]\n")
-                else:
-                    console.print(f"[red]Path: [bold red]{path}[/bold red] does not exist")
-            elif os.path.exists(os.path.dirname(path)) and len(paths) != 1:
-                queue = paths
-                if meta.get('show_queue') or meta.get('debug'):
-                    md_text = "\n - ".join(queue)
-                    console.print("\n[bold green]Queuing these files:[/bold green]", end='')
-                    console.print(Markdown(f"- {md_text.rstrip()}\n\n", style=Style(color='cyan')))
-                console.print(f"\nUnique uploads queued: [bold cyan]{len(queue)}[/bold cyan]\n")
-            elif not os.path.exists(os.path.dirname(path)):
+                    
+                    console.print(f"\nUnique uploads queued: [bold cyan]{len(queue)}[/bold cyan]\n")
+            else:
+                # Handle cases where directory does not exist and split paths
                 split_path = path.split()
+                queue = []
                 p1 = split_path[0]
+                
                 for i, each in enumerate(split_path):
                     try:
-                        if os.path.exists(p1) and not os.path.exists(f"{p1} {split_path[i+1]}"):
+                        if os.path.exists(p1) and not os.path.exists(f"{p1} {split_path[i + 1]}"):
                             queue.append(p1)
-                            p1 = split_path[i+1]
+                            p1 = split_path[i + 1]
                         else:
-                            p1 += f" {split_path[i+1]}"
+                            p1 += f" {split_path[i + 1]}"
                     except IndexError:
                         if os.path.exists(p1):
                             queue.append(p1)
                         else:
                             console.print(f"[red]Path: [bold red]{p1}[/bold red] does not exist")
-                if len(queue) >= 1:
+                
+                if queue:
                     if meta.get('show_queue') or meta.get('debug'):
                         md_text = "\n - ".join(queue)
                         console.print("\n[bold green]Queuing these files:[/bold green]", end='')
                         console.print(Markdown(f"- {md_text.rstrip()}\n\n", style=Style(color='cyan')))
+                    
                     console.print(f"\nTotal items queued: [bold cyan]{len(queue)}[/bold cyan]\n")
-            else:
-                console.print("[red]There was an issue with your input. If you think this was not an issue, please make a report that includes the full command used.")
-                exit()
+                else:
+                    console.print(f"[red]Path: [bold red]{path}[/bold red] does not exist")
+                    exit()
+
+
+
+
+
+
+
+
+
 
     delay = meta.get('delay', 0) or config['AUTO'].get('delay', 0)
     base_meta = {k: v for k, v in meta.items()}
