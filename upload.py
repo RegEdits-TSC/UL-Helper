@@ -73,9 +73,11 @@ http_trackers = [
 
 ############# EDITING BELOW THIS LINE MAY RESULT IN SCRIPT BREAKING #############
 
+# Determine the path to the Python 3 executable
 python3_path = shutil.which("python3")
 python_cmd = python3_path if python3_path else "python" 
 
+# Set up directory paths
 base_dir = os.path.dirname(os.path.realpath(__file__))
 data_dir = os.path.join(base_dir, 'data')
 config_path = os.path.abspath(os.path.join(data_dir, 'config.py'))
@@ -83,6 +85,13 @@ old_config_path = os.path.abspath(os.path.join(data_dir, 'backup', 'old_config.p
 minimum_version = Version('1.0.0')
 
 def get_backup_name(path, suffix='_bu'):
+    """
+    Generate a unique backup file name by appending a suffix and a counter.
+    
+    :param path: The base path for the backup file.
+    :param suffix: The suffix to append before the counter.
+    :return: A unique backup file name.
+    """
     base, ext = os.path.splitext(path)
     counter = 1
     while os.path.exists(path):
@@ -90,28 +99,39 @@ def get_backup_name(path, suffix='_bu'):
         counter += 1
     return path
 
+# Check if the configuration file exists
 if not os.path.exists(config_path):  
     console.print("[bold red] It appears you have no config file, please ensure to configure and place `/data/config.py`")
     exit()
 
 try:
+    # Attempt to import the configuration
     from data.config import config 
 except ImportError as e:
+    # Handle import errors and exit
     console.print(f"[bold red]Error importing config: {str(e)}[/bold red]")
     exit()
 
 def reconfigure():
+    """
+    Reconfigure the application by backing up the old configuration, 
+    running a reconfiguration script, and checking the outcome.
+    """
     console.print("[bold red]WARN[/bold red]: Version out of date, automatic upgrade in progress")
+    
     try:
+        # Backup old configuration if it exists
         if os.path.exists(old_config_path):
             backup_name = get_backup_name(old_config_path)
             shutil.move(old_config_path, backup_name)
+        # Move current config to old config path
         shutil.move(config_path, old_config_path)
     except Exception as e:
-        console.print("[bold red]ERROR[/bold red]: Unable to proceed with automatic upgrade. Please rename `config.py` to `old_config.py` move it to 'data/backup` and run `python3 data/reconfig.py`")
+        console.print("[bold red]ERROR[/bold red]: Unable to proceed with automatic upgrade. Please rename `config.py` to `old_config.py`, move it to 'data/backup`, and run `python3 data/reconfig.py`")
         console.print(f"Error: {str(e)}")
         exit()
 
+    # Run the reconfiguration script
     result = subprocess.run(
         [python_cmd, os.path.join(data_dir, "reconfig.py"), "--output-dir", data_dir],
         capture_output=True,
@@ -121,12 +141,14 @@ def reconfigure():
         console.print(f"[bold red]Error during reconfiguration: {result.stderr}[/bold red]")
         exit()
 
+    # Check if the new config file was created successfully
     if os.path.exists(config_path):
         console.print("[bold green]Congratulations! config.py was successfully updated.[/bold green]")
     else:
         console.print("[bold][red]ERROR[/red]: config.py not found in the expected directory after reconfiguration.[/bold]")
         exit()
 
+    # Final messages to the user
     console.print("Please double-check new config and ensure client settings were appropriately set.")
     console.print("[bold yellow]WARN[/bold yellow]: After verification of config, rerun command.")
     console.print("[dim green]Thanks for using Uploadrr :)")
