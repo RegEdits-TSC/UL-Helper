@@ -494,19 +494,6 @@ async def do_the_thing(base_dir):
         # Initialize a COMMON object with the provided configuration
         common = COMMON(config=config)
 
-        
-        
-        
-        
-        
-        
-        
-        
-
-
-
-
-
         # Iterate through each tracker in the list
         for tracker in trackers:
             # Remove 'DUPE?' from the end of the meta name if present
@@ -569,78 +556,98 @@ async def do_the_thing(base_dir):
                         skipped_files += 1
                         skipped_details.append((path, f"{tracker_class.tracker} Rejected Upload"))
 
-
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-            
+            # Check if the tracker is in the list of HTTP trackers
             if tracker in http_trackers:
+                # Initialize the tracker class using the tracker_class_map
                 tracker_class = tracker_class_map[tracker](config=config)
+                
+                # Determine if upload should proceed based on the unattended flag
                 if meta['unattended']:
                     upload_to_tracker = True
                 else:
+                    # Prompt the user for confirmation to upload, with choices "y" or "N"
                     upload_to_tracker = Confirm.ask(f"Upload to {tracker_class.tracker}? {debug}", choices=["y", "N"])
+                
+                # If upload is confirmed, proceed with uploading
                 if upload_to_tracker:
                     console.print(f"Uploading to {tracker}")
+                    
+                    # Check if the tracker is banned or has banned groups
                     if check_banned_group(tracker_class.tracker, tracker_class.banned_groups, meta, skipped_details, path):
                         skipped_files += 1
-                        skipped_details.append((path, f"Banned group on {tracker_class.tracker}"))                        
+                        skipped_details.append((path, f"Banned group on {tracker_class.tracker}"))
                         continue
+                    
+                    # Validate tracker credentials
                     if await tracker_class.validate_credentials(meta):
+                        # Search for existing items on the tracker and filter duplicates
                         dupes = await tracker_class.search_existing(meta)
                         dupes = await common.filter_dupes(dupes, meta)
                         meta, skipped = dupe_check(dupes, meta)
+                        
+                        # If duplicate check indicates a skip, log it and continue
                         if skipped:
                             skipped_files += 1
                             skipped_details.append((path, tracker))
                             continue
+                        
+                        # If upload is confirmed, perform the upload and add to client
                         if meta['upload']:
                             await tracker_class.upload(meta)
                             await client.add_to_client(meta, tracker_class.tracker)
                             successful_uploads += 1
 
+            # Check if the tracker is set to "MANUAL"
             if tracker == "MANUAL":
+                # Determine if manual upload should proceed based on the unattended flag
                 if meta['unattended']:
                     do_manual = True
                 else:
+                    # Prompt the user for confirmation to get files for manual upload
                     do_manual = Confirm.ask("Get files for manual upload?", default=True)
+                
+                # If manual upload is confirmed, process each tracker
                 if do_manual:
                     for manual_tracker in trackers:
+                        # Skip the manual tracker itself
                         if manual_tracker != 'MANUAL':
+                            # Clean up the tracker name and initialize the tracker class
                             manual_tracker = manual_tracker.replace(" ", "").upper().strip()
                             tracker_class = tracker_class_map[manual_tracker](config=config)
+                            
+                            # Perform editing of description based on tracker type
                             if manual_tracker in api_trackers:
                                 await common.unit3d_edit_desc(meta, tracker_class.tracker, tracker_class.signature)
                             else:
                                 await tracker_class.edit_desc(meta)
+                    
+                    # Package files for upload preparation
                     url = await prep.package(meta)
+                    
+                    # Handle the result of the packaging process
                     if not url:
-                        console.print(f"[yellow]Unable to upload prep files, they can be found at `tmp/{meta['uuid']}")
+                        console.print(f"[yellow]Unable to upload prep files, they can be found at `tmp/{meta['uuid']}`")
                     else:
                         console.print(f"[green]{meta['name']}")
-                        console.print(f"[green]Files can be found at: [yellow]{url}[/yellow]")  
+                        console.print(f"[green]Files can be found at: [yellow]{url}[/yellow]")
+
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
 
             if tracker == "BHD":
                 bhd = BHD(config=config)
