@@ -1,40 +1,47 @@
 import vapoursynth as vs
-core = vs.core
 from awsmfunc import ScreenGen, DynamicTonemap, FrameInfo, zresize
 import random
-import argparse
-from typing import Union, List
+import os
 from pathlib import Path
-import os, sys
 from functools import partial
+from typing import Union, List
 
-# Modified version of https://git.concertos.live/AHD/ahd_utils/src/branch/master/screengn.py
-def vs_screengn(source, encode, filter_b_frames, num, dir):
-    # prefer ffms2, fallback to lsmash for m2ts
+core = vs.core
+
+def vs_screengn(source: str, encode: Union[str, None], filter_b_frames: bool, num: int, dir: str) -> None:
+    """
+    Generate screenshots from a video source and its optional encoded version.
+
+    Args:
+        source (str): Path to the source video file.
+        encode (Union[str, None]): Path to the encoded video file or None if not available.
+        filter_b_frames (bool): Whether to filter B-frames from the encoded video.
+        num (int): Number of screenshots to generate.
+        dir (str): Directory where the screenshots will be saved.
+    """
+    # Choose source filter based on file extension
     if str(source).endswith(".m2ts"):
         src = core.lsmas.LWLibavSource(source)
     else:
-        src = core.ffms2.Source(source, cachefile=f"{os.path.abspath(dir)}{os.sep}ffms2.ffms2")
+        src = core.ffms2.Source(source, cachefile=f"{os.path.abspath(dir)}/ffms2.ffms2")
 
-    # we don't allow encodes in non-mkv containers anyway
+    # Handle optional encoding file
     if encode:
         enc = core.ffms2.Source(encode)
 
-    # since encodes are optional we use source length
+    # Determine number of frames in the source
     num_frames = len(src)
-    # these values don't really matter, they're just to cut off intros/credits
-    start, end = 1000, num_frames - 10000
+    start, end = 1000, num_frames - 10000  # Skip intros/credits
 
-    # filter b frames function for frameeval
+    # Function to filter B-frames
     def filter_ftype(n, f, clip, frame, frames, ftype="B"):
         if f.props["_PictType"].decode() == ftype:
             frames.append(frame)
         return clip
 
-    # generate random frame numbers, sort, and format for ScreenGen
-    # if filter option is on filter out non-b frames in encode
     frames = []
-    if filter_b_frames:
+    if filter_b_frames and encode:
+        # Filter B-frames from the encoded video
         with open(os.devnull, "wb") as f:
             i = 0
             while len(frames) < num:
@@ -44,32 +51,27 @@ def vs_screengn(source, encode, filter_b_frames, num, dir):
                 enc_f.output(f)
                 i += 1
                 if i > num * 10:
-                    raise ValueError("screengn: Encode doesn't seem to contain desired picture type frames.")
+                    raise ValueError("Screen Engine: Encode doesn't seem to contain desired picture type frames.")
     else:
-        for _ in range(num):
-            frames.append(random.randint(start, end))
+        # Generate random frames
+        frames = [random.randint(start, end) for _ in range(num)]
+
+    # Sort and write frame numbers to a file
     frames = sorted(frames)
-    frames = [f"{x}\n" for x in frames]
-
-    # write to file, we might want to re-use these later
     with open("screens.txt", "w") as txt:
-        txt.writelines(frames)
+        txt.writelines(f"{x}\n" for x in frames)
 
-    # if an encode exists we have to crop and resize
+    # Crop and resize if an encoded video is provided
     if encode:
-        if src.width != enc.width and src.height != enc.height:
+        if src.width != enc.width or src.height != enc.height:
             ref = zresize(enc, preset=src.height)
             crop = [(src.width - ref.width) / 2, (src.height - ref.height) / 2]
             src = src.std.Crop(left=crop[0], right=crop[0], top=crop[1], bottom=crop[1])
-            if enc.width / enc.height > 16 / 9:
-                width = enc.width
-                height = None
-            else:
-                width = None
-                height = enc.height
+            width = enc.width if enc.width / enc.height > 16 / 9 else None
+            height = enc.height if enc.width / enc.height <= 16 / 9 else None
             src = zresize(src, width=width, height=height)
 
-    # tonemap HDR
+    # Tonemap HDR if necessary
     tonemapped = False
     if src.get_frame(0).props["_Primaries"] == 9:
         tonemapped = True
@@ -77,11 +79,12 @@ def vs_screengn(source, encode, filter_b_frames, num, dir):
         if encode:
             enc = DynamicTonemap(enc, src_fmt=False, libplacebo=False, adjust_gamma=True)
 
-    # add FrameInfo
-    if tonemapped == True:
+    # Add FrameInfo and generate screenshots
+    if tonemapped:
         src = FrameInfo(src, "Tonemapped")
     ScreenGen(src, dir, "a")
+
     if encode:
-        if tonemapped == True:
+        if tonemapped:
             enc = FrameInfo(enc, "Encode (Tonemapped)")
         ScreenGen(enc, dir, "b")
