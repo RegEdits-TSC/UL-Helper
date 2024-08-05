@@ -1,3 +1,4 @@
+import console
 from torf import Torrent
 import xmlrpc.client
 import bencode
