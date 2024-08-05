@@ -2182,7 +2182,7 @@ class Prep():
                 if image_list == []:
                     if img_host_num == 0:
                         img_host_num = 1
-                    console.print("[yellow]Imgbox failed, trying next image host")
+                    console.print("[bold red]imgbox failed... Trying next image host.")
                     image_list, i = self.upload_screens(meta, screens - i , img_host_num + 1, i, total_screens, [], return_dict)        
             else:
                 with Progress(
@@ -2209,7 +2209,7 @@ class Prep():
                                 web_url = response['data']['url_viewer']
                                 raw_url = response['data']['image']['url']
                             except Exception:
-                                progress.console.print("[yellow]imgbb failed, trying next image host")
+                                progress.console.print("[bold red]imgbb failed... Trying next image host")
                                 progress.stop()
                                 newhost_list, i = self.upload_screens(meta, screens - i , img_host_num + 1, i, total_screens, [], return_dict)
                         elif img_host == "oeimg":
@@ -2227,7 +2227,7 @@ class Prep():
                                 web_url = response['data']['url_viewer']
                                 raw_url = response['data']['image']['url']
                             except Exception:
-                                progress.console.print("[yellow]oeimg failed, trying next image host")
+                                progress.console.print("[bold red]oeimg failed... Trying next image host.")
                                 progress.stop()
                                 newhost_list, i = self.upload_screens(meta, screens - i , img_host_num + 1, i, total_screens, [], return_dict)                                
                         elif img_host == "ptscreens":
@@ -2245,12 +2245,12 @@ class Prep():
                                 web_url = response['data']['url_viewer']
                                 raw_url = response['data']['image']['url']
                             except Exception:
-                                progress.console.print("[yellow]PT Screens failed, trying next image host")
+                                progress.console.print("[bold red]PT Screens failed... Trying next image host.")
                                 progress.stop()
                                 newhost_list, i = self.upload_screens(meta, screens - i , img_host_num + 1, i, total_screens, [], return_dict)        
                         elif img_host == "freeimage.host":
                             progress.console.print("[red]Support for freeimage.host has been removed. Please remove from your config")
-                            progress.console.print("continuing in 15 seconds")
+                            progress.console.print("Continuing in 15 seconds")
                             time.sleep(15)
                             progress.stop()
                             newhost_list, i = self.upload_screens(meta, screens - i, img_host_num + 1, i, total_screens, [], return_dict)
@@ -2272,7 +2272,7 @@ class Prep():
                                 img_url = response['th_url']
                                 web_url = response['show_url']
                             except Exception:
-                                progress.console.print("[yellow]pixhost failed, trying next image host")
+                                progress.console.print("[bold red]pixhost failed... Trying next image host.")
                                 progress.stop()
                                 newhost_list, i = self.upload_screens(meta, screens - i , img_host_num + 1, i, total_screens, [], return_dict)
                         elif img_host == "ptpimg":
@@ -2294,7 +2294,7 @@ class Prep():
                                 web_url = f"https://ptpimg.me/{ptpimg_code}.{ptpimg_ext}" 
                                 raw_url = f"https://ptpimg.me/{ptpimg_code}.{ptpimg_ext}" 
                             except:
-                                progress.console.print("[yellow]ptpimg failed, trying next image host")
+                                progress.console.print("[bold red]ptpimg failed... Trying next image host.")
                                 progress.stop()
                                 newhost_list, i = self.upload_screens(meta, screens - i, img_host_num + 1, i, total_screens, [], return_dict)
                         elif img_host == "lensdump":
@@ -2314,11 +2314,11 @@ class Prep():
                                 web_url = response['data']['url_viewer']
                                 raw_url = response['data']['image']['url']
                             except Exception:
-                                progress.console.print("[yellow]lensdump failed, trying next image host")
+                                progress.console.print("[bold red]lensdump failed... Trying next image host.")
                                 progress.stop()
                                 newhost_list, i = self.upload_screens(meta, screens - i , img_host_num + 1, i, total_screens, [], return_dict)
                         else:
-                            console.print("[bold red]Please choose a supported image host in your config")
+                            console.print("[bold red]ATTENTION: Please choose a supported image host in your config.py file.")
                             exit()
 
 
