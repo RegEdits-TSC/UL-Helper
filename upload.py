@@ -425,21 +425,6 @@ async def do_the_thing(base_dir):
         if int(meta.get('randomized', 0)) >= 1:
             prep.create_random_torrents(meta['base_dir'], meta['uuid'], meta['randomized'], meta['path'])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         # Determine the list of trackers to use, defaulting to configuration if not provided
         if meta.get('trackers', None) is not None:
             trackers = meta['trackers']
@@ -492,36 +477,31 @@ async def do_the_thing(base_dir):
                 if confirm:
                     break
 
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-
+        # Ensure trackers is a list, even if a single string was provided
         if not isinstance(trackers, list):
             trackers = [trackers]
+        
+        # Strip whitespace and convert all tracker names to uppercase
         trackers = [s.strip().upper() for s in trackers]
+        
+        # If 'manual' flag is set in meta, add "MANUAL" to the beginning of the trackers list
         if meta.get('manual', False):
             trackers.insert(0, "MANUAL")
-
+        
+        # Print a message indicating the path currently being processed
         console.print(f"Processing: [bold cyan]{path}[/bold cyan]")
+        
+        # Initialize a COMMON object with the provided configuration
         common = COMMON(config=config)
+
+        
+        
+        
+        
+        
+        
+        
+        
         for tracker in trackers:
             if meta['name'].endswith('DUPE?'):
                 meta['name'] = meta['name'].replace(' DUPE?', '')
