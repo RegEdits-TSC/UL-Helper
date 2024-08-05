@@ -370,7 +370,7 @@ async def do_the_thing(base_dir):
                     progress.update(task, advance=1)
 
         # Print information gathering status
-        console.print(f"[green]Gathering info for {os.path.basename(path)}")
+        console.print(f"[bold yellow]Gathering info for \"[/bold yellow][bold green]{os.path.basename(path)}[/bold green][bold yellow]\" | Please wait...")
 
         # Set default image host if not provided
         if meta['imghost'] is None:
@@ -958,12 +958,8 @@ async def do_the_thing(base_dir):
             f"Successful Uploads: [bold green]{successful_uploads}[/bold green]\n"
             f"Failed Uploads: [bold red]{skipped_files}[/bold red]",
             title="Upload Summary",
-            border_style="bold cyan"
+            border_style="bold yellow"
         ))
-
-
-
-
 
     # Handle skipped files
     if skipped_files > 0:
@@ -978,13 +974,15 @@ async def do_the_thing(base_dir):
                 tracker_skip_map[reason] = []
             tracker_skip_map[reason].append((file, tracker))
 
+        # Loop through reasons and associated files
         for reason, files in tracker_skip_map.items():
             reason_text = f"{reason}"
             reason_style = "bold red" if "banned" in reason.lower() or "rejected" in reason.lower() else "bold yellow"
-            
+
+            # Map paths to their files
             path_file_map = {}
             for file, _ in files:
-                path = os.path.dirname(file) + os.sep  
+                path = os.path.dirname(file) + os.sep
                 if path not in path_file_map:
                     path_file_map[path] = []
                 path_file_map[path].append(file)
@@ -996,10 +994,11 @@ async def do_the_thing(base_dir):
                 formatted_text = format_path_with_files(path, files)
                 combined_renderable.append(formatted_text)
 
-
+            # Add tip for duplicates
             if 'duplicate' in reason.lower():
                 combined_renderable.append(Text("\nTip: If 100% sure not a dupe pass with --skip-dupe-check", style="dim"))
 
+            # Create panel for reason
             reason_panel = Panel(
                 renderable=Group(*combined_renderable),
                 title=reason_text,
@@ -1011,6 +1010,8 @@ async def do_the_thing(base_dir):
     # Handle skipped TMDB files
     if skipped_tmdb_files:
         path_file_map = {}
+        
+        # Map paths to their files
         for file in skipped_tmdb_files:
             path = os.path.dirname(file) + os.sep
             if path not in path_file_map:
@@ -1024,8 +1025,10 @@ async def do_the_thing(base_dir):
             formatted_text = format_path_with_files(path, files)
             combined_renderable.append(formatted_text)
 
+        # Add tip for handling TMDB files
         combined_renderable.append(Text("\nTip: Pass individually with --tmdb #####", style="dim"))
 
+        # Create panel for TMDb ID not found
         reason_panel = Panel(
             renderable=Group(*combined_renderable),
             title="TMDb ID not found",
@@ -1033,19 +1036,24 @@ async def do_the_thing(base_dir):
         )
 
         console.print(reason_panel)
-        
+   
 def get_confirmation(meta):
+    # Print debug information if debug mode is enabled
     if meta['debug']:
         console.print("[bold red]DEBUG: True")
+
+    # Print the location of the saved prep material
     console.print(f"Prep material saved to {meta['base_dir']}/tmp/{meta['uuid']}")
     console.print()
 
+    # Prepare database info for display
     db_info = [
         f"[bold]Title[/bold]: {meta['title']} ({meta['year']})\n",
         f"[bold]Overview[/bold]: {meta['overview']}\n",
         f"[bold]Category[/bold]: {meta['category']}\n",
     ]
 
+    # Add links to various databases if IDs are available
     if int(meta.get('tmdb', 0)) != 0:
         db_info.append(f"TMDB: https://www.themoviedb.org/{meta['category'].lower()}/{meta['tmdb']}")
     if int(meta.get('imdb_id', '0')) != 0:
@@ -1055,12 +1063,17 @@ def get_confirmation(meta):
     if int(meta.get('mal_id', 0)) != 0:
         db_info.append(f"MAL : https://myanimelist.net/anime/{meta['mal_id']}")
 
+    # Display database info in a panel
     console.print(Panel("\n".join(db_info), title="Database Info", border_style="bold yellow"))
     console.print()
+
+    # Display freeleech information if available
     if int(meta.get('freeleech', '0')) != 0:
         console.print(f"[bold]Freeleech[/bold]: {meta['freeleech']}")
+
+    # Determine the tag and resolution based on the media type
     if meta['tag'] == "":
-            tag = ""
+        tag = ""
     else:
         tag = f" / {meta['tag'][1:]}"
     if meta['is_disc'] == "DVD":
@@ -1068,27 +1081,35 @@ def get_confirmation(meta):
     else:
         res = meta['resolution']
 
+    # Display resolution and type
     console.print(Text(f" {res} / {meta['type']}{tag}", style="bold"))
+
+    # Display personal release information if applicable
     if meta.get('personalrelease', False):
         console.print("[bright_magenta]Personal Release!")
     console.print()
+
+    # Prompt for confirmation if not in unattended mode
     if not meta.get('unattended', False):
         get_missing(meta)
-        ring_the_bell = "\a" if config['DEFAULT'].get("sfx_on_prompt", True) is True else "" # \a rings the bell
-        console.print(f"[bold yellow]Is this correct?{ring_the_bell}") 
+        ring_the_bell = "\a" if config['DEFAULT'].get("sfx_on_prompt", True) else ""  # \a rings the bell
+        console.print(f"[bold yellow]Is this correct?{ring_the_bell}")
         console.print(f"[bold]Name[/bold]: {meta['name']}")
         confirm = Confirm.ask(" Correct?")
     else:
         console.print(f"[bold]Name[/bold]: {meta['name']}")
         confirm = True
+    
     return confirm
 
 def dupe_check(dupes, meta, config, skipped_details, path):
+    # If no duplicates are found, mark for upload and return
     if not dupes:
         console.print("[green]No dupes found")
         meta['upload'] = True   
         return meta, False  # False indicates not skipped
 
+    # Create a table to display potential duplicates
     table = Table(
         title="Are these dupes?",
         title_justify="center",
@@ -1098,10 +1119,11 @@ def dupe_check(dupes, meta, config, skipped_details, path):
         show_lines=False,
         box=None
     )
-
+    
     table.add_column("Name")
     table.add_column("Size", justify="center")
 
+    # Populate the table with duplicate information
     for name, size in dupes.items():
         try:
             if "GB" in str(size).upper():
@@ -1120,12 +1142,14 @@ def dupe_check(dupes, meta, config, skipped_details, path):
     console.print(table)
     console.print()
 
+    # Preprocess string for comparison
     def preprocess_string(text):
         text = re.sub(r'\[[a-z]{3}\]', '', text, flags=re.IGNORECASE)
         text = re.sub(r'[^\w\s]', '', text)
         text = text.lower()
         return text
 
+    # Handle the similarity check and user confirmation
     def handle_similarity(similarity, meta):
         if similarity == 1.0:
             console.print(f"[red]Found exact match dupe.[dim](byte-for-byte)[/dim] Aborting..")
@@ -1136,17 +1160,19 @@ def dupe_check(dupes, meta, config, skipped_details, path):
             meta['upload'] = False
             return meta, True  # True indicates skipped
         else:
-            upload = Confirm.ask(" Upload Anyways?")
+            upload = Confirm.ask("Upload Anyways?")
             if not upload:
                 meta['upload'] = False
                 return meta, True  # True indicates skipped
         return meta, False  # False indicates not skipped
 
+    # Configure similarity and size tolerance thresholds
     similarity_threshold = max(config['AUTO'].get('dupe_similarity', 90.00) / 100, 0.70)
     size_tolerance = max(min(config['AUTO'].get('size_tolerance', 1 if meta['unattended'] else 30), 100), 1) / 100
 
     cleaned_meta_name = preprocess_string(meta['clean_name'])
 
+    # Check each potential duplicate
     for name, dupe_size in dupes.items():
         if isinstance(dupe_size, str) and "GB" in dupe_size:
             dupe_size = float(dupe_size.replace(" GB", "")) * (1024 ** 3)  # Convert GB to bytes
@@ -1154,8 +1180,8 @@ def dupe_check(dupes, meta, config, skipped_details, path):
             meta_size = meta.get('content_size')
             if meta_size is None:
                 meta_size = extract_size_from_torrent(meta['base_dir'], meta['uuid'])
-            dupe_size = int(dupe_size)   
-            if abs(meta_size - size) <= size_tolerance * meta_size:
+            dupe_size = int(dupe_size)
+            if abs(meta_size - dupe_size) <= size_tolerance * meta_size:
                 cleaned_dupe_name = preprocess_string(name)
                 similarity = SequenceMatcher(None, cleaned_meta_name, cleaned_dupe_name).ratio()
                 if similarity >= similarity_threshold:
@@ -1175,63 +1201,93 @@ def dupe_check(dupes, meta, config, skipped_details, path):
     return meta, False  # False indicates not skipped
 
 def extract_size_from_torrent(base_dir, uuid):
+    # Construct the path to the torrent file
     torrent_path = f"{base_dir}/tmp/{uuid}/BASE.torrent"
+    
+    # Read and decode the torrent file
     with open(torrent_path, 'rb') as f:
         torrent_data = bencode.decode(f.read())
     
+    # Extract the 'info' dictionary from the torrent data
     info = torrent_data[b'info']
+    
+    # Check if the torrent is a multi-file or single-file torrent
     if b'files' in info:
-        # Multi-file torrent
+        # Multi-file torrent: sum the lengths of all files
         return sum(file[b'length'] for file in info[b'files'])
     else:
-        # Single-file torrent
+        # Single-file torrent: return the length of the single file
         return info[b'length']
+
 
 
 # Return True if banned group
 def check_banned_group(tracker, banned_group_list, meta, skipped_details, path):
+    # Check if the 'tag' field is empty
     if meta['tag'] == "":
-        return False
-    else:
-        q = False
-        for tag in banned_group_list:
-            if isinstance(tag, list):
-                if meta['tag'][1:].lower() == tag[0].lower():
-                    console.print(f"[bold yellow]{meta['tag'][1:]}[/bold yellow][bold red] was found on [bold yellow]{tracker}'s[/bold yellow] list of banned groups.")
-                    console.print(f"[bold red]NOTE: [bold yellow]{tag[1]}")
-                    q = True
-            else:
-                if meta['tag'][1:].lower() == tag.lower():
-                    console.print(f"[bold yellow]{meta['tag'][1:]}[/bold yellow][bold red] was found on [bold yellow]{tracker}'s[/bold yellow] list of banned groups.")
-                    q = True
-        if q:
-            if meta.get('unattended', False) or not Confirm.ask("[bold red] Upload Anyways?"):
-                return True
+        return False  # No tag to check against banned groups
+
+    # Initialize a flag to indicate if a banned group was found
+    found_banned_group = False
+    
+    # Process each banned group tag in the list
+    for tag in banned_group_list:
+        # Check if the banned tag is in a list (for more detailed information)
+        if isinstance(tag, list):
+            if meta['tag'][1:].lower() == tag[0].lower():
+                console.print(f"[bold yellow]{meta['tag'][1:]}[/bold yellow][bold red] was found on [bold yellow]{tracker}'s[/bold yellow] list of banned groups.")
+                console.print(f"[bold red]NOTE: [bold yellow]{tag[1]}")
+                found_banned_group = True
+        else:
+            # Check if the banned tag matches a single string
+            if meta['tag'][1:].lower() == tag.lower():
+                console.print(f"[bold yellow]{meta['tag'][1:]}[/bold yellow][bold red] was found on [bold yellow]{tracker}'s[/bold yellow] list of banned groups.")
+                found_banned_group = True
+    
+    # If a banned group was found
+    if found_banned_group:
+        # If unattended or user confirms, return True
+        if meta.get('unattended', False) or not Confirm.ask("[bold red] Upload Anyways?"):
+            return True
+    
+    # Return False if no banned group was found or user chooses not to upload
     return False
 
 def get_missing(meta):
+    # Dictionary mapping potential missing fields to their descriptions
     info_notes = {
-        'edition' : 'Special Edition/Release',
-        'description' : "Please include Remux/Encode Notes if possible (either here or edit your upload)",
-        'service' : "WEB Service e.g.(AMZN, NF)",
-        'region' : "Disc Region",
-        'imdb' : 'IMDb ID (tt1234567)',
-        'distributor' : "Disc Distributor e.g.(BFI, Criterion, etc)"
+        'edition': 'Special Edition/Release',
+        'description': "Please include Remux/Encode Notes if possible (either here or edit your upload)",
+        'service': "WEB Service e.g. (AMZN, NF)",
+        'region': "Disc Region",
+        'imdb': 'IMDb ID (tt1234567)',
+        'distributor': "Disc Distributor e.g. (BFI, Criterion, etc)"
     }
+
+    # List to hold any missing information
     missing = []
+
+    # Check for missing IMDb ID
     if meta.get('imdb_id', '0') == '0':
         meta['imdb_id'] = '0'
         meta['potential_missing'].append('imdb_id')
-    if len(meta['potential_missing']) > 0:
+
+    # Check each potential missing field
+    if meta.get('potential_missing'):
         for each in meta['potential_missing']:
+            # Check if the field is empty, 'None', or '0'
             if str(meta.get(each, '')).replace(' ', '') in ["", "None", "0"]:
+                # Map 'imdb_id' to 'imdb' for clearer output
                 if each == "imdb_id":
-                    each = 'imdb' 
+                    each = 'imdb'
                 missing.append(f"--{each} | {info_notes.get(each)}")
-    if missing != []:
+
+    # Print missing information if there are any
+    if missing:
         console.print(Rule("Potentially missing information", style="bold yellow"))
         for each in missing:
-            if each.split('|')[0].replace('--', '').strip() in ["imdb"]:
+            # Print 'imdb' related information in bold red
+            if each.split('|')[0].replace('--', '').strip() == "imdb":
                 console.print(Text(each, style="bold red"))
             else:
                 console.print(each)
@@ -1240,40 +1296,59 @@ def get_missing(meta):
     return
 
 def print_banner():
+    # Define ASCII art banner
     ascii_art = r"""
-    
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::    _   _ ____  _     ___    _    ____       _   _ _____ _     ____  _____ ____     ::
-::   | | | |  _ \| |   / _ \  / \  |  _ \     | | | | ____| |   |  _ \| ____|  _ \    ::
-::   | | | | |_) | |  | | | |/ _ \ | | | |    | |_| |  _| | |   | |_) |  _| | |_) |   ::
-::   | |_| |  __/| |__| |_| / ___ \| |_| |    |  _  | |___| |___|  __/| |___|  _ <    ::
-::    \___/|_|   |_____\___/_/   \_\____/     |_| |_|_____|_____|_|   |_____|_| \_\   ::
-::                                                                                    ::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::     
-                                                    
-    """
+ .--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--. 
+/ .. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \
+\ \/\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ \/ /
+ \/ /`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'\/ / 
+ / /\                                                                                    / /\ 
+/ /\ \    _   _ ____  _     ___    _    ____    _   _ _____ _     ____  _____ ____      / /\ \
+\ \/ /   | | | |  _ \| |   / _ \  / \  |  _ \  | | | | ____| |   |  _ \| ____|  _ \     \ \/ /
+ \/ /    | | | | |_) | |  | | | |/ _ \ | | | | | |_| |  _| | |   | |_) |  _| | |_) |     \/ / 
+ / /\    | |_| |  __/| |__| |_| / ___ \| |_| | |  _  | |___| |___|  __/| |___|  _ <      / /\ 
+/ /\ \    \___/|_|   |_____\___/_/   \_\____/  |_| |_|_____|_____|_|   |_____|_| \_\    / /\ \
+\ \/ /                                                                                  \ \/ /
+ \/ /                                                                                    \/ / 
+ / /\.--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--./ /\ 
+/ /\ \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \.. \/\ \
+\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `'\ `' /
+ `--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--' 
+ 
+
+"""
+    # Print the ASCII art banner, centered and in bold style
     console.print(Align.center(Text(f"\n\n{ascii_art}\n", style='bold')))
 
 def list_directory(directory):
+    # Initialize a list to store the absolute paths of non-hidden files
     items = []
+    
+    # Iterate through all files in the specified directory
     for file in os.listdir(directory):
+        # Skip hidden files (those starting with a dot)
         if not file.startswith('.'):
+            # Construct the absolute path and add it to the list
             items.append(os.path.abspath(os.path.join(directory, file)))
+    
+    # Return the list of absolute paths
     return items
 
-
 if __name__ == '__main__':
+    # Get the current Python version
     pyver = platform.python_version_tuple()
+    
+    # Check if the major version is not 3
     if int(pyver[0]) != 3:
         console.print("[bold red]Python2 Detected, please use python3")
         exit()
     else:
+        # Check if the minor version is 6 or lower
         if int(pyver[1]) <= 6:
             console.print("[bold red]Python <= 3.6 Detected, please use Python >=3.7")
+            # Use an event loop for Python versions <= 3.6
             loop = asyncio.get_event_loop()
             loop.run_until_complete(do_the_thing(base_dir))
         else:
+            # Directly run the coroutine for Python >= 3.7
             asyncio.run(do_the_thing(base_dir))
-        
