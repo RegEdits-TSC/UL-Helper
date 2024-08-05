@@ -435,7 +435,7 @@ config = {
     },
 
 
-    "TORRENT_CLIENTS" : {
+"TORRENT_CLIENTS" : {
         # Name your torrent clients here, for example, this example is named "Client1"
         "Client1" : {
             "torrent_client" : "qbit",
@@ -510,7 +510,7 @@ config = {
     },
 
 
-    "DISCORD" :{
+"DISCORD" :{
         "discord_bot_token" : "discord bot token",
         "discord_bot_description" : "Upload Assistant",
         "command_prefix" : "!",
