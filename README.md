@@ -121,7 +121,7 @@ python3 upload.py "/path/to/media" --args
 ```
 Example: 
 ```
-python3 upload.py "/home/regedits/torrents/qbittorrent/uploads/Avengers.Age.of.Ultron.2015.2160p.DSNP.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-RegEdits.mkv" --args -tk AITHER -ns -pr -d [code]This release is sourced from DisneyPlus[/code] -s 5 -c movie -tmdb 99861 -edition hybrid -webdv
+python3 upload.py "/home/regedits/torrents/qbittorrent/uploads/Avengers.Age.of.Ultron.2015.2160p.DSNP.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-RegEdits.mkv" --args -tk AITHER -ns -pr -d [code]This release is sourced from DisneyPlus[/code] -s 5 -c movie -tmdb 99861 -webdv
 ```
 
 Arguments are optional. For a list of acceptable arguments, use `--help`. For an overview of arguments with descriptions, navigate to the `arguments.txt` file in the main directory.
